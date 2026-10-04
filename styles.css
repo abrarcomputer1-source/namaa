@@ -315,3 +315,56 @@ dialog::backdrop{background:rgba(13,35,57,.35)}
 .back-link{display:block;text-align:center;margin-top:16px;color:var(--blue);font-weight:700}
 .cloud-status{position:fixed;bottom:14px;left:14px;z-index:30;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.93);border:1px solid var(--line);box-shadow:var(--shadow-soft);font-size:12px;color:#59718d;backdrop-filter:blur(8px)}
 @media(max-width:900px){.session-box{width:100%;min-width:0;justify-content:space-between}.login-content{padding:24px 20px 28px}.login-content h1{font-size:27px}}
+
+/* === V8: التكليف + تقارير الخطة === */
+.edit-only-block{display:block}
+.viewer .edit-only-block{display:none!important}
+.viewer .basic-editor{display:none!important}
+.viewer .stats-viewer{display:block}
+.admin-body:not(.viewer) .stats-viewer{display:none}
+.basic-summary{margin-bottom:18px;background:linear-gradient(135deg,#ffffff 0%,#f6fbff 55%,#f7f3ff 100%)}
+.basic-summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.info-tile{padding:16px;border-radius:18px;background:rgba(255,255,255,.88);border:1px solid #dfebf3;box-shadow:0 8px 20px rgba(40,86,123,.05)}
+.info-tile small{display:block;color:#7a8da5;font-size:11px;margin-bottom:5px}
+.info-tile strong{display:block;color:#18436f;font-family:'El Messiri','Cairo',sans-serif;font-size:17px;line-height:1.7}
+.assignment-note{padding:16px 18px;border-radius:18px;background:linear-gradient(135deg,#eef9fb,#f5f2ff);color:#496782;line-height:1.95;margin-bottom:16px}
+.assignment-note strong{color:#144371;font-family:'El Messiri','Cairo',sans-serif}
+.assignment-document{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:18px;align-items:start}
+.assignment-preview{min-height:280px;border:1px solid #dbe8f1;border-radius:22px;background:#fff;overflow:hidden;display:grid;place-items:center}
+.assignment-preview img{display:block;width:100%;height:auto;max-height:620px;object-fit:contain;background:#fff}
+.assignment-preview iframe{width:100%;height:560px;border:0;background:#fff}
+.assignment-empty{padding:50px 20px;text-align:center;color:#8394aa}
+.assignment-actions{padding:18px;border:1px solid #dfeaf3;border-radius:20px;background:#fff;box-shadow:var(--shadow-soft)}
+.assignment-actions strong{font-family:'El Messiri','Cairo',sans-serif;color:#174371;font-size:19px;display:block;margin-bottom:7px}
+.assignment-actions p{color:#768aa3;font-size:13px;line-height:1.8;word-break:break-word}
+.assignment-actions .btn{width:100%;margin-top:9px}
+.upload-panel{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:16px;border:1px dashed #cbdde8;border-radius:20px;background:linear-gradient(135deg,#fbfeff,#f7f4ff);margin-top:16px}
+.upload-panel>div{flex:1;min-width:240px}
+.upload-panel strong{font-family:'El Messiri','Cairo',sans-serif;color:#164370;font-size:18px}
+.upload-panel p{margin:4px 0 0;color:#7b8ea5;font-size:12px}
+.attachment-preview{margin-top:12px}
+.compact-preview{min-height:0}
+.file-pill{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 13px;border-radius:14px;background:#f4f9fc;border:1px solid #dbe8f1;color:#365d7e}
+.file-pill strong{font-size:13px}
+.report-link{display:inline-flex;align-items:center;justify-content:center;padding:7px 10px;border-radius:10px;background:#eef7ff;color:#0d6fa5;font-weight:800;font-size:12px;border:1px solid #d7e9f4;cursor:pointer}
+.report-link:hover{background:#e4f3fb}
+.status-pill{display:inline-flex;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:800;background:#eef7fb;color:#416985}
+.date-range{display:grid;gap:2px;font-size:12px;color:#5f7690;white-space:nowrap}
+.followup-report{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:7px}
+.viewer-card-title{font-family:'El Messiri','Cairo',sans-serif;color:#153f70;font-size:24px;margin:0 0 14px}
+.stats-viewer-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.stats-viewer-grid .info-tile{text-align:center}
+.stats-viewer-grid .info-tile strong{font-size:28px}
+.checkbox-row{display:flex!important;grid-column:1/-1;align-items:center;gap:9px;color:#7a4960!important;background:#fff7fa;padding:10px 12px;border-radius:13px;border:1px solid #f1d9e1}
+.checkbox-row input{width:auto}
+
+@media(max-width:980px){
+  .basic-summary-grid{grid-template-columns:repeat(2,1fr)}
+  .assignment-document{grid-template-columns:1fr}
+  .assignment-preview iframe{height:460px}
+  .stats-viewer-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:560px){
+  .basic-summary-grid{grid-template-columns:1fr}
+  .assignment-preview iframe{height:400px}
+}

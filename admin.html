@@ -30,11 +30,11 @@
     <main class="admin-main">
       <div class="admin-topbar card">
         <div>
-          <h1>مرحبًا أبرار</h1>
-          <p>تحكم كامل في الواجهة والمربعات والمحتوى العام للمنصة</p>
+          <h1>مرحبًا <span id="currentUserName">...</span></h1>
+          <p>لوحة متابعة وإدارة منصة نماء</p>
         </div>
         <div class="session-box">
-          <div><small>الحساب الحالي</small><strong id="currentUserName">...</strong><span id="currentRoleBadge" class="role-badge">...</span></div>
+          <div><small>الصلاحية</small><span id="currentRoleBadge" class="role-badge">...</span></div>
           <button type="button" class="btn secondary" id="logoutBtn">تسجيل الخروج</button>
         </div>
       </div>
@@ -49,7 +49,7 @@
       </section>
 
       <section data-panel="intro" class="admin-panel">
-        <div class="card padded form-card wide-card">
+        <div class="card padded form-card wide-card edit-only-block">
           <h2>المقدمة والواجهة</h2>
           <p class="admin-note">من هنا تستطيعين تعديل النصوص الرئيسية ووضع خلفية مناسبة للواجهة العلوية.</p>
           <label>عنوان الواجهة <input id="fHeroTitle" /></label>
@@ -60,25 +60,40 @@
             <label class="file-pick">اختيار صورة من الجهاز <input type="file" id="fHeroImageFile" accept="image/*" /></label>
             <button type="button" class="btn secondary edit-only" id="clearHeroImageBtn">إزالة الصورة الحالية</button>
           </div>
-          <input type="hidden" id="fHeroImageData" />
           <div class="preview-box"><img id="heroPreview" alt="معاينة الواجهة" /></div>
           <button class="btn primary save-btn" data-save="intro">حفظ التعديلات</button>
         </div>
       </section>
 
       <section data-panel="basic" class="admin-panel">
-        <div class="card padded form-card wide-card"><h2>البيانات الأساسية والتكليف</h2>
+        <div class="section-head admin-head"><h2>البيانات الأساسية والتكليف</h2></div>
+
+        <div id="basicSummary" class="basic-summary card padded"></div>
+
+        <div class="card padded form-card wide-card edit-only-block basic-editor">
+          <h2>تعديل البيانات والتكليف</h2>
+          <p class="admin-note">يمكن رفع صورة التكليف أو ملف PDF. سيظهر للمديرة في صفحة مرتبة مع إمكانية المعاينة والتنزيل.</p>
           <label>اسم المدرسة <input id="fSchool" /></label>
           <label>اسم المنسقة <input id="fCoordinator" /></label>
           <label>اسم المديرة <input id="fPrincipal" /></label>
           <label>الفصل الدراسي <input id="fSemester" /></label>
           <label>ملاحظات التكليف <textarea id="fAssignment" rows="4"></textarea></label>
+          <div class="upload-panel">
+            <div>
+              <strong>مرفق التكليف</strong>
+              <p>الصيغ المقبولة: JPG / PNG / WEBP / PDF — بحد أقصى 12MB.</p>
+            </div>
+            <label class="file-pick">رفع صورة أو PDF <input type="file" id="fAssignmentFile" accept="image/*,application/pdf" /></label>
+            <button type="button" class="btn secondary" id="clearAssignmentFileBtn">إزالة المرفق</button>
+          </div>
+          <div id="assignmentUploadPreview" class="attachment-preview compact-preview"></div>
           <button class="btn primary save-btn" data-save="basic">حفظ التعديلات</button>
         </div>
       </section>
 
       <section data-panel="plan" class="admin-panel">
         <div class="section-head admin-head"><h2>الخطة الفصلية</h2><button class="btn primary edit-only" id="addPlanBtn">+ إضافة بند</button></div>
+        <p class="admin-note">لكل بند فترة تنفيذ من–إلى، ونسبة إنجاز، ويمكن إرفاق تقرير PDF مستقل.</p>
         <div id="planTableWrap" class="card padded"></div>
       </section>
 
@@ -102,7 +117,7 @@
       </section>
 
       <section data-panel="stats" class="admin-panel">
-        <div class="card padded form-card wide-card"><h2>الإحصائيات</h2>
+        <div class="card padded form-card wide-card edit-only-block"><h2>الإحصائيات</h2>
           <p class="admin-note">يمكنك تعديل محتوى المربعات الإحصائية، وتنعكس مباشرة في الواجهة العامة.</p>
           <label>عدد البرامج <input type="number" id="sPrograms" min="0" /></label>
           <label>عدد المسجلات <input type="number" id="sRegistered" min="0" /></label>
@@ -110,6 +125,7 @@
           <label>عدد الموهوبات <input type="number" id="sGifted" min="0" /></label>
           <button class="btn primary save-btn" data-save="stats">حفظ الإحصائيات</button>
         </div>
+        <div id="statsViewer" class="stats-viewer card padded"></div>
       </section>
 
       <section data-panel="links" class="admin-panel">
