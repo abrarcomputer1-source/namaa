@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>لوحة تحكم نماء</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="admin-body">
+  <div class="admin-shell">
+    <aside class="sidebar">
+      <div class="side-brand">
+        <img src="assets/mawhiba-logo.png" alt="موهبة" />
+        <strong>نماء</strong>
+        <small>لوحة التحكم</small>
+      </div>
+      <button data-section="dashboard" class="side-link active">الرئيسية</button>
+      <button data-section="intro" class="side-link">المقدمة والواجهة</button>
+      <button data-section="basic" class="side-link">البيانات الأساسية والتكليف</button>
+      <button data-section="plan" class="side-link">الخطة الفصلية</button>
+      <button data-section="followup" class="side-link">متابعة الخطة</button>
+      <button data-section="programs" class="side-link">البرامج والإعلانات</button>
+      <button data-section="opportunities" class="side-link">الفرص والمسابقات</button>
+      <button data-section="achievements" class="side-link">الإنجازات والشواهد</button>
+      <button data-section="stats" class="side-link">الإحصائيات</button>
+      <button data-section="links" class="side-link">الروابط المهمة</button>
+      <a href="index.html" class="side-link">عرض الموقع</a>
+    </aside>
+
+    <main class="admin-main">
+      <div class="admin-topbar card">
+        <div>
+          <h1>مرحبًا أبرار</h1>
+          <p>تحكم كامل في الواجهة والمربعات والمحتوى العام للمنصة</p>
+        </div>
+        <div class="session-box">
+          <div><small>الحساب الحالي</small><strong id="currentUserName">...</strong><span id="currentRoleBadge" class="role-badge">...</span></div>
+          <button type="button" class="btn secondary" id="logoutBtn">تسجيل الخروج</button>
+        </div>
+      </div>
+
+      <section data-panel="dashboard" class="admin-panel active">
+        <div id="dashboardStats" class="stats"></div>
+        <div class="card padded">
+          <div class="section-head"><h2>متابعة الخطة الفصلية</h2><strong id="overallProgress">0%</strong></div>
+          <div class="progress"><span id="progressBar"></span></div>
+          <div id="planMiniList" class="list-stack compact"></div>
+        </div>
+      </section>
+
+      <section data-panel="intro" class="admin-panel">
+        <div class="card padded form-card wide-card">
+          <h2>المقدمة والواجهة</h2>
+          <p class="admin-note">من هنا تستطيعين تعديل النصوص الرئيسية ووضع خلفية مناسبة للواجهة العلوية.</p>
+          <label>عنوان الواجهة <input id="fHeroTitle" /></label>
+          <label>النص التعريفي <textarea id="fHeroText" rows="3"></textarea></label>
+          <label>رؤية المنصة <textarea id="fVision" rows="4"></textarea></label>
+          <label>صورة/خلفية الواجهة عبر رابط مباشر <input id="fHeroImageUrl" placeholder="https://..." /></label>
+          <div class="image-tools">
+            <label class="file-pick">اختيار صورة من الجهاز <input type="file" id="fHeroImageFile" accept="image/*" /></label>
+            <button type="button" class="btn secondary edit-only" id="clearHeroImageBtn">إزالة الصورة الحالية</button>
+          </div>
+          <input type="hidden" id="fHeroImageData" />
+          <div class="preview-box"><img id="heroPreview" alt="معاينة الواجهة" /></div>
+          <button class="btn primary save-btn" data-save="intro">حفظ التعديلات</button>
+        </div>
+      </section>
+
+      <section data-panel="basic" class="admin-panel">
+        <div class="card padded form-card wide-card"><h2>البيانات الأساسية والتكليف</h2>
+          <label>اسم المدرسة <input id="fSchool" /></label>
+          <label>اسم المنسقة <input id="fCoordinator" /></label>
+          <label>اسم المديرة <input id="fPrincipal" /></label>
+          <label>الفصل الدراسي <input id="fSemester" /></label>
+          <label>ملاحظات التكليف <textarea id="fAssignment" rows="4"></textarea></label>
+          <button class="btn primary save-btn" data-save="basic">حفظ التعديلات</button>
+        </div>
+      </section>
+
+      <section data-panel="plan" class="admin-panel">
+        <div class="section-head admin-head"><h2>الخطة الفصلية</h2><button class="btn primary edit-only" id="addPlanBtn">+ إضافة بند</button></div>
+        <div id="planTableWrap" class="card padded"></div>
+      </section>
+
+      <section data-panel="followup" class="admin-panel">
+        <div class="card padded"><h2>متابعة الخطة ونسبة الإنجاز</h2><div id="followupList" class="list-stack"></div></div>
+      </section>
+
+      <section data-panel="programs" class="admin-panel">
+        <div class="section-head admin-head"><h2>إدارة البرامج والإعلانات</h2><button class="btn primary edit-only" id="addProgramBtn">+ إضافة مربع / إعلان</button></div>
+        <div id="programTableWrap" class="card padded"></div>
+      </section>
+
+      <section data-panel="opportunities" class="admin-panel">
+        <div class="section-head admin-head"><h2>الفرص والمسابقات</h2><button class="btn primary edit-only" id="addOpportunityBtn">+ إضافة مربع فرصة</button></div>
+        <div id="opportunitiesTableWrap" class="card padded"></div>
+      </section>
+
+      <section data-panel="achievements" class="admin-panel">
+        <div class="section-head admin-head"><h2>الإنجازات والشواهد</h2><button class="btn primary edit-only" id="addAchievementBtn">+ إضافة مربع إنجاز</button></div>
+        <div id="achievementTableWrap" class="card padded"></div>
+      </section>
+
+      <section data-panel="stats" class="admin-panel">
+        <div class="card padded form-card wide-card"><h2>الإحصائيات</h2>
+          <p class="admin-note">يمكنك تعديل محتوى المربعات الإحصائية، وتنعكس مباشرة في الواجهة العامة.</p>
+          <label>عدد البرامج <input type="number" id="sPrograms" min="0" /></label>
+          <label>عدد المسجلات <input type="number" id="sRegistered" min="0" /></label>
+          <label>عدد المشاركات <input type="number" id="sParticipants" min="0" /></label>
+          <label>عدد الموهوبات <input type="number" id="sGifted" min="0" /></label>
+          <button class="btn primary save-btn" data-save="stats">حفظ الإحصائيات</button>
+        </div>
+      </section>
+
+      <section data-panel="links" class="admin-panel">
+        <div class="section-head admin-head"><h2>الروابط المهمة</h2><button class="btn primary edit-only" id="addLinkBtn">+ إضافة مربع رابط</button></div>
+        <div id="linksTableWrap" class="card padded"></div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="editorDialog">
+    <form method="dialog" id="editorForm" class="dialog-form">
+      <div class="dialog-head"><h3 id="dialogTitle">إضافة</h3><button value="cancel" class="icon-btn" type="button" onclick="document.getElementById('editorDialog').close()">×</button></div>
+      <div id="dialogFields"></div>
+      <div class="dialog-actions"><button value="cancel" class="btn secondary" type="button" onclick="document.getElementById('editorDialog').close()">إلغاء</button><button id="dialogSave" value="default" class="btn primary" type="submit">حفظ</button></div>
+    </form>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
+</body>
+</html>
