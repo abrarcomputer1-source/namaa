@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b6fa4" />
+  <title>نماء | المنصة الرقمية لرعاية الموهوبات</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header container">
+    <img src="assets/header-banner.png" alt="بنر منصة نماء" class="header-banner-image" />
+  </header>
+
+  <nav class="nav container">
+    <a href="#home">الرئيسية</a>
+    <a href="#programs">البرامج</a>
+    <a href="#opportunities">الفرص والمسابقات</a>
+    <a href="#achievements">الإنجازات</a>
+    <a href="#links">روابط مهمة</a>
+    <a class="admin-link" href="admin.html">دخول الإدارة</a>
+  </nav>
+
+  <main id="home" class="container">
+    <section class="hero card">
+      <div class="hero-copy">
+        <span class="eyebrow">مرجع رقمي متكامل</span>
+        <h2 id="heroTitle">الموهوبات صانعات المستقبل</h2>
+        <p id="heroText">منصة تجمع البرامج والفرص والإنجازات ومتابعة الخطة في مكان واحد.</p>
+        <div class="hero-actions">
+          <a href="#programs" class="btn primary">البرامج الفصلية</a>
+          <a href="#opportunities" class="btn secondary">الفرص والمسابقات</a>
+        </div>
+      </div>
+      <div class="hero-media" id="heroMedia">
+        <div class="hero-media-overlay">
+          <small>واجهة قابلة للتخصيص من لوحة التحكم</small>
+          <strong>أضيفي صورة أو خلفية مناسبة لهذا الجزء والإعلانات</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats" id="stats"></section>
+
+    <section id="programs" class="section-block">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">متجدد باستمرار</span>
+          <h2>الإعلانات والبرامج الحالية</h2>
+        </div>
+      </div>
+      <div class="program-grid" id="programGrid"></div>
+    </section>
+
+    <section id="opportunities" class="section-block two-col">
+      <div class="card padded">
+        <div class="section-head"><h2>الفرص والمسابقات القادمة</h2></div>
+        <div id="opportunityList" class="list-stack"></div>
+      </div>
+      <div class="card padded vision-card">
+        <div class="section-head"><h2>رؤية المنصة</h2></div>
+        <p id="visionText" class="large-text">بيئة رقمية محفزة لرعاية الموهوبات واكتشاف قدراتهن وتعزيز فرصهن النوعية وصناعة مستقبل واعد.</p>
+      </div>
+    </section>
+
+    <section id="achievements" class="section-block">
+      <div class="section-head"><h2>أبرز الإنجازات والشواهد</h2></div>
+      <div id="achievementGrid" class="achievement-grid"></div>
+    </section>
+
+    <section id="links" class="section-block">
+      <div class="section-head"><h2>روابط مهمة</h2></div>
+      <div id="importantLinks" class="link-grid"></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span id="footerCoordinator">منسقة الموهوبات: أبرار الهنيدي</span>
+      <span id="footerPrincipal">مديرة المدرسة: هدى البهيجي</span>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
+</body>
+</html>
