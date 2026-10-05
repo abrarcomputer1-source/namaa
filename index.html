@@ -12,13 +12,19 @@
     <img src="assets/header-banner.png" alt="بنر منصة نماء" class="header-banner-image" />
   </header>
 
-  <nav class="nav container">
-    <a href="#home">الرئيسية</a>
-    <a href="#programs">البرامج</a>
-    <a href="#opportunities">الفرص والمسابقات</a>
-    <a href="#achievements">الإنجازات</a>
-    <a href="#links">روابط مهمة</a>
-    <a class="admin-link" href="admin.html">دخول الإدارة</a>
+  <div class="container achievements-top-wrap">
+    <div id="achievementsTicker" class="achievements-ticker achievements-top-ticker" aria-label="شريط الإنجازات"></div>
+  </div>
+
+  <nav class="nav container public-nav" aria-label="التنقل الرئيسي">
+    <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="navLinks">القائمة</button>
+    <div class="nav-links" id="navLinks">
+      <a href="#home">الرئيسية</a>
+      <a href="#programs">البرامج</a>
+      <a href="#opportunities">الفرص والمسابقات</a>
+      <a href="#achievements">الإنجازات</a>
+      <a href="#links">روابط مهمة</a>
+    </div>
   </nav>
 
   <main id="home" class="container">
@@ -26,21 +32,27 @@
       <div class="hero-copy">
         <span class="eyebrow">مرجع رقمي متكامل</span>
         <h2 id="heroTitle">الموهوبات صانعات المستقبل</h2>
-        <p id="heroText">منصة تجمع البرامج والفرص والإنجازات ومتابعة الخطة في مكان واحد.</p>
+        <p id="heroText">منصة تجمع البرامج والفرص والإنجازات في مكان واحد.</p>
         <div class="hero-actions">
           <a href="#programs" class="btn primary">البرامج الفصلية</a>
           <a href="#opportunities" class="btn secondary">الفرص والمسابقات</a>
         </div>
       </div>
-      <div class="hero-media" id="heroMedia">
-        <div class="hero-media-overlay">
-          <small>واجهة قابلة للتخصيص من لوحة التحكم</small>
-          <strong>أضيفي صورة أو خلفية مناسبة لهذا الجزء والإعلانات</strong>
-        </div>
-      </div>
+      <div class="hero-media public-hero-media" id="heroMedia" aria-label="صورة تحفيزية للموهوبات"></div>
     </section>
 
     <section class="stats" id="stats"></section>
+
+    <section id="nextOpportunitySection" class="next-opportunity-section" hidden>
+      <div class="next-opportunity-card card">
+        <div>
+          <span class="mini-label">أقرب فرصة</span>
+          <h2 id="nextOpportunityTitle"></h2>
+          <p id="nextOpportunityDate"></p>
+        </div>
+        <a id="nextOpportunityLink" class="btn secondary" target="_blank" rel="noopener">عرض التفاصيل</a>
+      </div>
+    </section>
 
     <section id="programs" class="section-block">
       <div class="section-head">
@@ -63,7 +75,7 @@
       </div>
     </section>
 
-    <section id="achievements" class="section-block">
+    <section id="achievements" class="section-block achievements-section">
       <div class="section-head"><h2>أبرز الإنجازات والشواهد</h2></div>
       <div id="achievementGrid" class="achievement-grid"></div>
     </section>
@@ -78,6 +90,7 @@
     <div class="container footer-inner">
       <span id="footerCoordinator">منسقة الموهوبات: أبرار الهنيدي</span>
       <span id="footerPrincipal">مديرة المدرسة: هدى البهيجي</span>
+      <span id="footerLastUpdated" class="footer-update"></span>
     </div>
   </footer>
 

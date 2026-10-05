@@ -15,7 +15,7 @@
         <small>لوحة التحكم</small>
       </div>
       <button data-section="dashboard" class="side-link active">الرئيسية</button>
-      <button data-section="intro" class="side-link">المقدمة والواجهة</button>
+      <button data-section="intro" class="side-link admin-only-nav">المقدمة والواجهة</button>
       <button data-section="basic" class="side-link">البيانات الأساسية والتكليف</button>
       <button data-section="plan" class="side-link">الخطة الفصلية</button>
       <button data-section="followup" class="side-link">متابعة الخطة</button>
@@ -23,8 +23,9 @@
       <button data-section="opportunities" class="side-link">الفرص والمسابقات</button>
       <button data-section="achievements" class="side-link">الإنجازات والشواهد</button>
       <button data-section="stats" class="side-link">الإحصائيات</button>
-      <button data-section="links" class="side-link">الروابط المهمة</button>
-      <a href="index.html" class="side-link">عرض الموقع</a>
+      <button data-section="links" class="side-link admin-only-nav">الروابط المهمة</button>
+      <button data-section="account" class="side-link admin-only-nav">الحساب وكلمة المرور</button>
+      <a href="index.html" class="side-link" target="_blank" rel="noopener">معاينة الموقع</a>
     </aside>
 
     <main class="admin-main">
@@ -35,6 +36,7 @@
         </div>
         <div class="session-box">
           <div><small>الصلاحية</small><span id="currentRoleBadge" class="role-badge">...</span></div>
+          <a href="index.html" target="_blank" rel="noopener" class="btn secondary top-preview-btn">معاينة الموقع</a>
           <button type="button" class="btn secondary" id="logoutBtn">تسجيل الخروج</button>
         </div>
       </div>
@@ -93,7 +95,8 @@
 
       <section data-panel="plan" class="admin-panel">
         <div class="section-head admin-head"><h2>الخطة الفصلية</h2><button class="btn primary edit-only" id="addPlanBtn">+ إضافة بند</button></div>
-        <p class="admin-note">لكل بند فترة تنفيذ من–إلى، ونسبة إنجاز، ويمكن إرفاق تقرير PDF مستقل.</p>
+        <p class="admin-note">لكل بند فترة تنفيذ من–إلى، ونسبة إنجاز، ويمكن إرفاق تقرير PDF مستقل حتى 50MB.</p>
+        <div class="plan-tools card padded"><label>تصفية حسب الحالة<select id="planStatusFilter"><option value="all">الكل</option><option value="مكتمل">مكتمل</option><option value="جار التنفيذ">جار التنفيذ</option><option value="لم يبدأ">لم يبدأ</option></select></label></div>
         <div id="planTableWrap" class="card padded"></div>
       </section>
 
@@ -131,6 +134,29 @@
       <section data-panel="links" class="admin-panel">
         <div class="section-head admin-head"><h2>الروابط المهمة</h2><button class="btn primary edit-only" id="addLinkBtn">+ إضافة مربع رابط</button></div>
         <div id="linksTableWrap" class="card padded"></div>
+      </section>
+
+      <section data-panel="account" class="admin-panel admin-only-panel">
+        <div class="card padded form-card wide-card">
+          <h2>الحساب وكلمة المرور</h2>
+          <p class="admin-note">يمكن لكل مستخدم تغيير كلمة مروره بنفسه. وإذا نسيتِها يمكن استخدام رابط الاستعادة من صفحة الدخول.</p>
+          <div class="account-email-box"><small>البريد الحالي</small><strong id="currentUserEmail">...</strong></div>
+          <form id="changePasswordForm" class="account-password-form">
+            <label>كلمة المرور الجديدة
+              <div class="password-field"><input id="accountNewPassword" type="password" minlength="8" autocomplete="new-password" required><button class="password-toggle" type="button" data-toggle-password="accountNewPassword" aria-label="إظهار كلمة المرور" title="إظهار كلمة المرور"><span class="eye-icon" aria-hidden="true"></span></button></div>
+            </label>
+            <label>تأكيد كلمة المرور
+              <div class="password-field"><input id="accountNewPasswordConfirm" type="password" minlength="8" autocomplete="new-password" required><button class="password-toggle" type="button" data-toggle-password="accountNewPasswordConfirm" aria-label="إظهار كلمة المرور" title="إظهار كلمة المرور"><span class="eye-icon" aria-hidden="true"></span></button></div>
+            </label>
+            <button class="btn primary" type="submit">تغيير كلمة المرور</button>
+            <div id="accountPasswordMessage" class="login-message" aria-live="polite"></div>
+          </form>
+        </div>
+        <div class="card padded form-card wide-card admin-only-block" id="directorResetCard">
+          <h2>مساعدة المديرة في استعادة كلمة المرور</h2>
+          <p class="admin-note">لأسباب أمنية لا يتم تعيين كلمة مرور مستخدم آخر مباشرة من المتصفح. يمكنك إرسال رابط استعادة آمن إلى بريد المديرة.</p>
+          <form id="directorResetForm"><label>بريد المديرة<input id="directorResetEmail" type="email" required placeholder="name@example.com"></label><button class="btn secondary" type="submit">إرسال رابط الاستعادة</button><div id="directorResetMessage" class="login-message" aria-live="polite"></div></form>
+        </div>
       </section>
     </main>
   </div>
