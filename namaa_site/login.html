@@ -12,12 +12,18 @@
       <img src="assets/header-banner.png" alt="منصة نماء" class="login-banner" />
       <div class="login-content">
         <span class="eyebrow">دخول آمن</span>
-        <h1>لوحة إدارة منصة نماء</h1>
-        <p>استخدمي البريد وكلمة المرور الخاصة بحسابك. صلاحيات التعديل تُحدد تلقائيًا من قاعدة البيانات.</p>
+        <h1>لوحة منصة نماء</h1>
+        <p>استخدمي البريد وكلمة المرور الخاصة بحسابك. الصلاحيات تُحدد تلقائيًا حسب الحساب.</p>
         <form id="loginForm">
           <label>البريد الإلكتروني<input id="loginEmail" type="email" autocomplete="email" required /></label>
-          <label>كلمة المرور<input id="loginPassword" type="password" autocomplete="current-password" required /></label>
+          <label>كلمة المرور
+            <div class="password-field">
+              <input id="loginPassword" type="password" autocomplete="current-password" required />
+              <button class="password-toggle" type="button" data-toggle-password="loginPassword" aria-label="إظهار كلمة المرور" title="إظهار كلمة المرور"><span class="eye-icon" aria-hidden="true"></span></button>
+            </div>
+          </label>
           <button class="btn primary login-submit" type="submit">تسجيل الدخول</button>
+          <a href="forgot-password.html" class="forgot-link">نسيت كلمة المرور؟</a>
           <div id="loginMessage" class="login-message" aria-live="polite"></div>
         </form>
         <a href="index.html" class="back-link">العودة إلى واجهة الزوار</a>
