@@ -164,7 +164,7 @@ function renderPublic(){
   footerPrincipal.textContent=`مديرة المدرسة: ${d.basic.principal}`;
   if(document.getElementById('footerLastUpdated')) footerLastUpdated.textContent=d.updatedAt?`آخر تحديث: ${formatLastUpdated(d.updatedAt)}`:'';
   const hm=document.getElementById('heroMedia');
-  const heroBg=d.heroImage?publicMediaUrl(d.heroImage):'assets/hero-gifted-future.png';
+  const heroBg=d.heroImage?publicMediaUrl(d.heroImage):'assets/hero-gifted-future.png?v=9.5.0';
   hm.style.backgroundImage=`linear-gradient(180deg,rgba(17,59,106,.04),rgba(17,59,106,.12)),url('${esc(heroBg)}')`;
   stats.innerHTML=[['البرامج',d.stats.programs],['المسجلات',d.stats.registered],['المشاركات',d.stats.participants],['الموهوبات',d.stats.gifted]].map((x,i)=>`<div class="stat"><span class="stat-index">${String(i+1).padStart(2,'0')}</span><div class="stat-copy"><b>${esc(x[1])}</b><span>${esc(x[0])}</span></div></div>`).join('');
   const next=d.opportunities?.[0];
@@ -419,6 +419,11 @@ async function setupExecutivePlan(){
   const page=document.getElementById('executivePlanPage');
   if(!page)return;
   setBusy('جارِ تحميل الخطة التنفيذية...');
+  let execDirty=false;
+  const pendingDeletes=new Set();
+  const markDirty=()=>{execDirty=true};
+  const beforeUnload=e=>{if(execDirty){e.preventDefault();e.returnValue='';}};
+  window.addEventListener('beforeunload',beforeUnload);
   try{
     const {data:{session}}=await sb.auth.getSession();
     if(!session){location.replace('login.html');return}
@@ -436,18 +441,23 @@ async function setupExecutivePlan(){
     document.getElementById('execPlanMeta').innerHTML=`<span>${esc(plan.date_from||'')}</span>${plan.date_to?`<span>إلى ${esc(plan.date_to)}</span>`:''}<span class="status-pill">${esc(plan.status||'')}</span><span>${Number(plan.progress||0)}%</span>`;
 
     const rowsWrap=document.getElementById('execRows');
+    const editableRow=(r,i,isNew=false)=>`<tr data-id="${isNew?'new-'+crypto.randomUUID():r.id}" ${isNew?'data-new="1"':''}>
+      <td class="exec-num" data-label="رقم">${i+1}</td>
+      <td data-label="الإجراءات"><div class="exec-row-tools"><textarea class="exec-procedure" rows="2" placeholder="اكتبي الإجراء">${esc(r.procedure_text||'')}</textarea><button type="button" class="exec-delete-mini exec-delete" title="حذف الصف" aria-label="حذف الصف">×</button></div></td>
+      <td class="exec-check" data-label="نعم"><input class="exec-choice" type="checkbox" data-choice="yes" ${r.executed===true?'checked':''} aria-label="نعم"></td>
+      <td class="exec-check" data-label="لا"><input class="exec-choice" type="checkbox" data-choice="no" ${r.executed===false?'checked':''} aria-label="لا"></td>
+      <td data-label="السبب"><textarea class="exec-reason" rows="2" placeholder="اكتبي السبب عند الحاجة">${esc(r.reason||'')}</textarea></td>
+    </tr>`;
+    const renumber=()=>[...rowsWrap.querySelectorAll('tr[data-id]')].forEach((tr,i)=>{const n=tr.querySelector('.exec-num');if(n)n.textContent=i+1});
+    const showEmptyIfNeeded=()=>{if(!rowsWrap.querySelector('tr[data-id]'))rowsWrap.innerHTML='<tr class="exec-empty-row"><td colspan="5" class="empty-state">لم تتم إضافة إجراءات بعد. استخدمي زر «إضافة صف».</td></tr>'};
+
     const renderRows=async()=>{
       const {data,error}=await sb.from('executive_plan_steps').select('*').eq('plan_item_id',planId).order('sort_order').order('created_at');
       if(error)throw error;
       const rows=data||[];
+      pendingDeletes.clear(); execDirty=false;
       if(currentRole==='admin'){
-        rowsWrap.innerHTML=rows.map((r,i)=>`<tr data-id="${r.id}">
-          <td class="exec-num" data-label="رقم">${i+1}</td>
-          <td data-label="الإجراءات"><div class="exec-row-tools"><textarea class="exec-procedure" rows="2" placeholder="اكتبي الإجراء">${esc(r.procedure_text||'')}</textarea><button type="button" class="exec-delete-mini exec-delete" data-id="${r.id}" title="حذف الصف" aria-label="حذف الصف">×</button></div></td>
-          <td class="exec-check" data-label="نعم"><input class="exec-choice" type="checkbox" data-choice="yes" ${r.executed===true?'checked':''} aria-label="نعم"></td>
-          <td class="exec-check" data-label="لا"><input class="exec-choice" type="checkbox" data-choice="no" ${r.executed===false?'checked':''} aria-label="لا"></td>
-          <td data-label="السبب"><textarea class="exec-reason" rows="2" placeholder="اكتبي السبب عند الحاجة">${esc(r.reason||'')}</textarea></td>
-        </tr>`).join('') || '<tr><td colspan="5" class="empty-state">لم تتم إضافة إجراءات بعد. استخدمي زر «إضافة صف».</td></tr>';
+        rowsWrap.innerHTML=rows.map((r,i)=>editableRow(r,i,false)).join('') || '<tr class="exec-empty-row"><td colspan="5" class="empty-state">لم تتم إضافة إجراءات بعد. استخدمي زر «إضافة صف».</td></tr>';
       }else{
         rowsWrap.innerHTML=rows.map((r,i)=>`<tr>
           <td class="exec-num" data-label="رقم">${i+1}</td>
@@ -461,48 +471,78 @@ async function setupExecutivePlan(){
 
     await renderRows();
 
-    document.getElementById('execAddRow')?.addEventListener('click',async()=>{
+    document.getElementById('execAddRow')?.addEventListener('click',()=>{
       if(currentRole!=='admin')return;
-      const {data:last}=await sb.from('executive_plan_steps').select('sort_order').eq('plan_item_id',planId).order('sort_order',{ascending:false}).limit(1).maybeSingle();
-      const {error}=await sb.from('executive_plan_steps').insert({plan_item_id:planId,procedure_text:'',executed:null,reason:'',sort_order:(last?.sort_order??-1)+1});
-      if(error){alert('تعذر إضافة الصف: '+error.message);return}
-      await renderRows();
+      rowsWrap.querySelector('.exec-empty-row')?.remove();
+      const i=rowsWrap.querySelectorAll('tr[data-id]').length;
+      rowsWrap.insertAdjacentHTML('beforeend',editableRow({procedure_text:'',executed:null,reason:''},i,true));
+      markDirty();
+      rowsWrap.querySelector('tr:last-child .exec-procedure')?.focus();
+    });
+
+    rowsWrap.addEventListener('input',e=>{
+      if(e.target.matches('.exec-procedure,.exec-reason')) markDirty();
     });
 
     rowsWrap.addEventListener('change',e=>{
       const box=e.target.closest('.exec-choice');
-      if(!box||!box.checked)return;
-      const tr=box.closest('tr');
-      tr?.querySelectorAll('.exec-choice').forEach(other=>{if(other!==box)other.checked=false});
+      if(!box)return;
+      if(box.checked){
+        const tr=box.closest('tr');
+        tr?.querySelectorAll('.exec-choice').forEach(other=>{if(other!==box)other.checked=false});
+      }
+      markDirty();
     });
 
     document.getElementById('execSave')?.addEventListener('click',async()=>{
       if(currentRole!=='admin')return;
       const rows=[...rowsWrap.querySelectorAll('tr[data-id]')];
+      const saveBtn=document.getElementById('execSave');
       try{
+        saveBtn.disabled=true;
         showCloudStatus('جارِ حفظ الخطة التنفيذية...');
         for(let i=0;i<rows.length;i++){
           const tr=rows[i],id=tr.dataset.id;
           const yes=tr.querySelector('input[data-choice="yes"]')?.checked;
           const no=tr.querySelector('input[data-choice="no"]')?.checked;
           const executed=yes?true:no?false:null;
-          const payload={procedure_text:tr.querySelector('.exec-procedure').value.trim(),executed,reason:tr.querySelector('.exec-reason').value.trim(),sort_order:i};
-          const {error}=await sb.from('executive_plan_steps').update(payload).eq('id',id);
+          const payload={plan_item_id:planId,procedure_text:tr.querySelector('.exec-procedure').value.trim(),executed,reason:tr.querySelector('.exec-reason').value.trim(),sort_order:i};
+          if(tr.dataset.new==='1'){
+            const {data,error}=await sb.from('executive_plan_steps').insert(payload).select('id').single();
+            if(error)throw error;
+            if(!data?.id)throw new Error('لم يتم تأكيد إضافة أحد الإجراءات.');
+          }else{
+            const {data,error}=await sb.from('executive_plan_steps').update({procedure_text:payload.procedure_text,executed:payload.executed,reason:payload.reason,sort_order:i,updated_at:new Date().toISOString()}).eq('id',id).eq('plan_item_id',planId).select('id').maybeSingle();
+            if(error)throw error;
+            if(!data?.id)throw new Error('لم يتم حفظ أحد الإجراءات. تحققي من الصلاحيات ثم أعيدي المحاولة.');
+          }
+        }
+        if(pendingDeletes.size){
+          const ids=[...pendingDeletes];
+          const {error}=await sb.from('executive_plan_steps').delete().in('id',ids).eq('plan_item_id',planId);
           if(error)throw error;
         }
-        await touchSiteUpdatedAt();
-        showCloudStatus('تم حفظ الخطة التنفيذية');
+        try{await touchSiteUpdatedAt()}catch(_e){}
+        execDirty=false; pendingDeletes.clear();
         await renderRows();
-      }catch(err){alert('تعذر الحفظ: '+err.message)}
+        showCloudStatus('تم حفظ الخطة التنفيذية بنجاح');
+      }catch(err){
+        alert('تعذر الحفظ: '+err.message+'\nلن تُمسح الكتابة الحالية من الشاشة، ويمكنك المحاولة مرة أخرى.');
+      }finally{saveBtn.disabled=false}
     });
 
-    rowsWrap.addEventListener('click',async e=>{
+    rowsWrap.addEventListener('click',e=>{
       const btn=e.target.closest('.exec-delete');
       if(!btn||currentRole!=='admin')return;
-      if(!confirm('حذف هذا الإجراء؟'))return;
-      const {error}=await sb.from('executive_plan_steps').delete().eq('id',btn.dataset.id);
-      if(error){alert('تعذر الحذف: '+error.message);return}
-      await renderRows();
+      const tr=btn.closest('tr[data-id]');
+      if(!tr)return;
+      if(!confirm('حذف هذا الإجراء؟ سيتم اعتماد الحذف عند الضغط على «حفظ الخطة التنفيذية».'))return;
+      if(tr.dataset.new!=='1')pendingDeletes.add(tr.dataset.id);
+      tr.remove();
+      renumber();
+      showEmptyIfNeeded();
+      markDirty();
+      showCloudStatus('تم حذف الصف من المسودة — اضغطي حفظ لاعتماد التغيير');
     });
   }catch(err){
     document.getElementById('execPlanError').textContent='تعذر تحميل الخطة التنفيذية: '+err.message;
