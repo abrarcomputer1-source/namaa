@@ -9,7 +9,13 @@
 </head>
 <body>
   <header class="site-header container">
-    <img src="assets/header-banner.png" alt="بنر منصة نماء" class="header-banner-image" />
+    <div class="banner-shell">
+      <img src="assets/header-banner.png" alt="بنر منصة نماء" class="header-banner-image" />
+      <a class="banner-admin-entry" href="login.html" aria-label="دخول الإدارة">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10V8a5 5 0 0 1 10 0v2M6 10h12a1 1 0 0 1 1 1v9H5v-9a1 1 0 0 1 1-1Z"/><path d="M12 14v3"/></svg>
+        <span>دخول الإدارة</span>
+      </a>
+    </div>
   </header>
 
   <div class="container achievements-top-wrap">
@@ -17,7 +23,9 @@
   </div>
 
   <nav class="nav container public-nav" aria-label="التنقل الرئيسي">
-    <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="navLinks">القائمة</button>
+    <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="navLinks" aria-label="فتح القائمة">
+      <span class="menu-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+    </button>
     <div class="nav-links" id="navLinks">
       <a href="#home">الرئيسية</a>
       <a href="#programs">البرامج</a>

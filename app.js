@@ -185,7 +185,7 @@ function renderPublic(){
   importantLinks.innerHTML=d.links.map((l,i)=>`<a class="important-link" target="_blank" rel="noopener" href="${esc(l.url)}"><span class="item-index">${String(i+1).padStart(2,'0')}</span><span class="link-title"><strong>${esc(l.title)}</strong><small>فتح الرابط</small></span><span class="link-arrow">‹</span></a>`).join('')||'<div class="important-link">لا توجد روابط مضافة.</div>';
 }
 
-function table(headers,rows){return `<div style="overflow:auto"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`}
+function table(headers,rows){return `<div class="responsive-table-wrap"><table class="responsive-table"><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map((c,i)=>`<td data-label="${esc(headers[i]||'')}">${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`}
 function actions(type,id){return currentRole==='admin'?`<button class="action-btn row-edit edit-only" onclick="openEdit('${type}','${id}')">تعديل</button><button class="action-btn danger row-delete edit-only" onclick="removeItem('${type}','${id}')">حذف</button>`:'مشاهدة فقط'}
 function dateRangeHtml(p){
   const from=p.dateFrom||p.date||'—',to=p.dateTo||'—';
@@ -263,7 +263,7 @@ function dialogContent(type,item={}){
   if(type==='achievements')return `<div class="dialog-fields-grid"><label class="full">عنوان الإنجاز<input name="title" value="${esc(item.title||'')}"></label><label class="full">ملاحظة / وصف<textarea name="note" rows="4">${esc(item.note||'')}</textarea></label><label class="full">رابط الشاهد<input name="evidence" type="url" value="${esc(item.evidence||'')}"></label><label class="full">صورة الإنجاز<input name="achievementImage" value="${esc(item.image||'')}" placeholder="رابط صورة أو ارفعي صورة من الجهاز"></label><label class="full"><span class="file-pick">اختيار صورة<input type="file" accept="image/*" data-upload="achievement" data-target="achievementImage"></span></label><div class="preview-box full ${item.image?'has-image':''}"><img id="dialogAchievementPreview" ${item.image?`src="${esc(publicMediaUrl(item.image))}"`:''} alt="معاينة الإنجاز"></div></div>`;
   return `<div class="dialog-fields-grid"><label class="full">اسم الرابط<input name="title" value="${esc(item.title||'')}"></label><label class="full">الرابط<input name="url" type="url" value="${esc(item.url||'')}"></label></div>`;
 }
-function openDialog(type,item=null){if(currentRole!=='admin')return;editContext={type,id:item?.id||null,oldReportPath:item?.reportPath||''};dialogTitle.textContent=item?'تعديل':'إضافة';dialogFields.innerHTML=dialogContent(type,item||{});editorDialog.showModal()}
+function openDialog(type,item=null){if(currentRole!=='admin')return;editContext={type,id:item?.id||null,oldReportPath:item?.reportPath||''};dialogTitle.textContent=item?'تعديل':'إضافة';dialogFields.innerHTML=dialogContent(type,item||{});document.body.classList.add('modal-open');editorDialog.showModal();requestAnimationFrame(()=>editorDialog.querySelector('input,textarea,select')?.focus({preventScroll:true}))}
 window.openEdit=(type,id)=>{const item=cloudData[type].find(x=>String(x.id)===String(id));openDialog(type,item)};
 async function removeItem(type,id){
   if(currentRole!=='admin'||!confirm('هل تريدين حذف هذا العنصر؟'))return;
@@ -389,8 +389,26 @@ async function initPublic(){
   try{await loadPublicData(false);renderPublic()}catch(e){console.error(e);cloudData=structuredClone(FALLBACK);renderPublic();alert('تعذر الاتصال بقاعدة البيانات مؤقتًا.')}finally{clearBusy()}
 }
 
-document.getElementById('navToggle')?.addEventListener('click',()=>{const nav=document.getElementById('navLinks');const open=nav.classList.toggle('open');navToggle.setAttribute('aria-expanded',String(open))});
+document.getElementById('navToggle')?.addEventListener('click',()=>{const nav=document.getElementById('navLinks');const btn=document.getElementById('navToggle');const open=nav.classList.toggle('open');btn?.setAttribute('aria-expanded',String(open));btn?.classList.toggle('is-open',open)});
 document.querySelectorAll('#navLinks a').forEach(a=>a.addEventListener('click',()=>document.getElementById('navLinks')?.classList.remove('open')));
+
+// تحسينات الاستخدام على الجوال: تثبيت الخلفية في النوافذ المنبثقة وقائمة لوحة التحكم.
+const editorDialogEl=document.getElementById('editorDialog');
+editorDialogEl?.addEventListener('close',()=>document.body.classList.remove('modal-open'));
+editorDialogEl?.addEventListener('cancel',()=>document.body.classList.remove('modal-open'));
+const adminMenuToggle=document.getElementById('adminMenuToggle');
+const adminSidebar=document.getElementById('adminSidebar');
+function setAdminMenu(open){
+  adminSidebar?.classList.toggle('mobile-open',open);
+  document.body.classList.toggle('admin-nav-open',open);
+  adminMenuToggle?.classList.toggle('is-open',open);
+  adminMenuToggle?.setAttribute('aria-expanded',String(open));
+}
+adminMenuToggle?.addEventListener('click',()=>setAdminMenu(!adminSidebar?.classList.contains('mobile-open')));
+document.querySelectorAll('#adminSidebar .side-link').forEach(el=>el.addEventListener('click',()=>{if(matchMedia('(max-width:900px)').matches)setAdminMenu(false)}));
+document.addEventListener('click',e=>{if(!matchMedia('(max-width:900px)').matches)return;if(!document.body.classList.contains('admin-nav-open'))return;if(adminSidebar?.contains(e.target)||adminMenuToggle?.contains(e.target))return;setAdminMenu(false)});
+window.addEventListener('resize',()=>{if(!matchMedia('(max-width:900px)').matches)setAdminMenu(false)});
+
 setupLogin();setupForgotPassword();setupResetPassword();setupAdmin();initPublic();
 
 
@@ -424,19 +442,19 @@ async function setupExecutivePlan(){
       const rows=data||[];
       if(currentRole==='admin'){
         rowsWrap.innerHTML=rows.map((r,i)=>`<tr data-id="${r.id}">
-          <td class="exec-num">${i+1}</td>
-          <td><div class="exec-row-tools"><textarea class="exec-procedure" rows="2" placeholder="اكتبي الإجراء">${esc(r.procedure_text||'')}</textarea><button type="button" class="exec-delete-mini exec-delete" data-id="${r.id}" title="حذف الصف" aria-label="حذف الصف">×</button></div></td>
-          <td class="exec-check"><input class="exec-choice" type="checkbox" data-choice="yes" ${r.executed===true?'checked':''} aria-label="نعم"></td>
-          <td class="exec-check"><input class="exec-choice" type="checkbox" data-choice="no" ${r.executed===false?'checked':''} aria-label="لا"></td>
-          <td><textarea class="exec-reason" rows="2" placeholder="اكتبي السبب عند الحاجة">${esc(r.reason||'')}</textarea></td>
+          <td class="exec-num" data-label="رقم">${i+1}</td>
+          <td data-label="الإجراءات"><div class="exec-row-tools"><textarea class="exec-procedure" rows="2" placeholder="اكتبي الإجراء">${esc(r.procedure_text||'')}</textarea><button type="button" class="exec-delete-mini exec-delete" data-id="${r.id}" title="حذف الصف" aria-label="حذف الصف">×</button></div></td>
+          <td class="exec-check" data-label="نعم"><input class="exec-choice" type="checkbox" data-choice="yes" ${r.executed===true?'checked':''} aria-label="نعم"></td>
+          <td class="exec-check" data-label="لا"><input class="exec-choice" type="checkbox" data-choice="no" ${r.executed===false?'checked':''} aria-label="لا"></td>
+          <td data-label="السبب"><textarea class="exec-reason" rows="2" placeholder="اكتبي السبب عند الحاجة">${esc(r.reason||'')}</textarea></td>
         </tr>`).join('') || '<tr><td colspan="5" class="empty-state">لم تتم إضافة إجراءات بعد. استخدمي زر «إضافة صف».</td></tr>';
       }else{
         rowsWrap.innerHTML=rows.map((r,i)=>`<tr>
-          <td class="exec-num">${i+1}</td>
-          <td>${esc(r.procedure_text||'—')}</td>
-          <td class="exec-check exec-view-mark">${r.executed===true?'✓':'—'}</td>
-          <td class="exec-check exec-view-mark">${r.executed===false?'✓':'—'}</td>
-          <td>${esc(r.reason||'—')}</td>
+          <td class="exec-num" data-label="رقم">${i+1}</td>
+          <td data-label="الإجراءات">${esc(r.procedure_text||'—')}</td>
+          <td class="exec-check exec-view-mark" data-label="نعم">${r.executed===true?'✓':'—'}</td>
+          <td class="exec-check exec-view-mark" data-label="لا">${r.executed===false?'✓':'—'}</td>
+          <td data-label="السبب">${esc(r.reason||'—')}</td>
         </tr>`).join('') || '<tr><td colspan="5" class="empty-state">لم تتم إضافة إجراءات للخطة التنفيذية بعد.</td></tr>';
       }
     };
