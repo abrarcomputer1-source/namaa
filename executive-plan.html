@@ -4,52 +4,35 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
   <meta name="theme-color" content="#0b6fa4" />
   <title>الخطة التنفيذية | نماء</title>
-  <link rel="stylesheet" href="styles.css?v=9.6.0" />
+  <link rel="stylesheet" href="styles.css?v=10.0.0" />
 </head>
 <body class="executive-page">
-  <header class="container exec-header">
-    <img src="assets/header-banner.png?v=9.5.0" alt="منصة نماء" />
-  </header>
-
+  <header class="container exec-header screen-only"><img src="assets/header-banner.png?v=10.0.0" alt="منصة نماء" /></header>
   <main id="executivePlanPage" class="container">
-    <div class="exec-toolbar exec-toolbar-compact">
-      <a class="btn secondary" href="admin.html">العودة إلى الخطة الفصلية</a>
-      <button id="execAddRow" class="btn primary exec-admin-only" type="button">+ إضافة صف</button>
+    <div class="exec-toolbar exec-toolbar-compact screen-only">
+      <a class="btn secondary" id="backToPlanBtn" href="admin.html#plan">العودة إلى الخطة الفصلية</a>
+      <div class="exec-toolbar-actions"><button id="execPrint" class="btn secondary" type="button">طباعة الخطة A4</button><button id="execAddRow" class="btn primary exec-admin-only" type="button">+ إضافة مرحلة</button></div>
     </div>
-
     <div id="execPlanError" class="exec-error" hidden></div>
-
     <section class="card exec-card">
+      <div class="print-letterhead">
+        <div class="print-ministry-mark"><div class="moe-symbol" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div><div><strong>وزارة التعليم</strong><small>Ministry of Education</small></div></div>
+        <div class="print-school-head"><strong>المملكة العربية السعودية</strong><span>وزارة التعليم</span><span>الإدارة العامة للتعليم بمنطقة المدينة المنورة</span><span>الثانوية الأولى للبنات بينبع البحر</span><span>ثانوية تعليم كبيرات بينبع البحر</span></div>
+        <img src="assets/school-logo.jpeg" alt="شعار المدرسة" class="print-school-logo" />
+      </div>
       <div class="exec-section-heading">
-        <h1 id="execPlanTitle">الخطة التنفيذية</h1>
-        <div id="execPlanMeta" class="exec-meta"></div>
+        <h1 id="execPlanTitle">الخطة التنفيذية</h1><div id="execPlanMeta" class="exec-meta"></div>
+        <div class="exec-overall-progress"><span>نسبة الإنجاز المحسوبة</span><strong id="execOverallProgress">0%</strong><div class="progress"><span id="execOverallBar"></span></div></div>
       </div>
-      <table class="exec-table" aria-label="الخطة التنفيذية">
-        <thead>
-          <tr>
-            <th rowspan="2" class="exec-num-head">#</th>
-            <th rowspan="2">الإجراءات</th>
-            <th colspan="3">التنفيذ</th>
-          </tr>
-          <tr>
-            <th class="exec-choice-head">نعم</th>
-            <th class="exec-choice-head">لا</th>
-            <th>السبب</th>
-          </tr>
-        </thead>
-        <tbody id="execRows"></tbody>
-      </table>
-      <div class="exec-actions exec-admin-only">
-        <button id="execSave" class="btn primary" type="button">حفظ الخطة التنفيذية</button>
-      </div>
+      <div class="exec-table-scroll"><table class="exec-table exec-table-v10"><thead><tr><th class="exec-num-head">#</th><th>المرحلة والتوقيت</th><th>إجراءات التنفيذ</th><th>المسؤول عن التنفيذ</th><th>الشواهد ومؤشرات التحقق</th><th>نسبة الإنجاز</th><th>التنفيذ</th></tr></thead><tbody id="execRows"></tbody></table></div>
+      <datalist id="phaseSuggestions"><option value="التخطيط"></option><option value="الإعلان"></option><option value="التسجيل"></option><option value="التنفيذ"></option><option value="المتابعة"></option><option value="التوثيق والتقييم"></option></datalist>
+      <div class="exec-actions exec-admin-only screen-only"><span id="execDraftStatus" class="draft-status">الحفظ التلقائي للمسودة مفعّل</span><button id="execSave" class="btn primary" type="button">حفظ الخطة التنفيذية</button></div>
+      <div class="print-signatures"><div><span>منسقة الموهوبات</span><strong id="printCoordinator">أبرار الهنيدي</strong></div><div><span>مديرة المدرسة</span><strong id="printPrincipal">هدى البهيجي</strong></div></div>
     </section>
   </main>
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=9.6.0"></script>
+  <script src="app.js?v=10.0.0"></script>
 </body>
 </html>

@@ -8,12 +8,12 @@
   <meta http-equiv="Expires" content="0" />
   <meta name="theme-color" content="#0b6fa4" />
   <title>نماء | المنصة الرقمية لرعاية الموهوبات</title>
-  <link rel="stylesheet" href="styles.css?v=9.6.0" />
+  <link rel="stylesheet" href="styles.css?v=10.0.0" />
 </head>
 <body>
   <header class="site-header container">
     <div class="banner-shell">
-      <img src="assets/header-banner.png?v=9.5.0" alt="بنر منصة نماء" class="header-banner-image" />
+      <img src="assets/header-banner.png?v=10.0.0" alt="بنر منصة نماء" class="header-banner-image" />
       <a class="banner-admin-entry" href="login.html" aria-label="دخول الإدارة">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10V8a5 5 0 0 1 10 0v2M6 10h12a1 1 0 0 1 1 1v9H5v-9a1 1 0 0 1 1-1Z"/><path d="M12 14v3"/></svg>
         <span>دخول الإدارة</span>
@@ -52,6 +52,12 @@
       <div class="hero-media public-hero-media" id="heroMedia" aria-label="صورة تحفيزية للموهوبات"></div>
     </section>
 
+    <section class="identity-cards" aria-label="هوية المنصة">
+      <article class="identity-card vision-identity"><span>الرؤية</span><p id="visionText"></p></article>
+      <article class="identity-card message-identity"><span>الرسالة</span><p id="messageText"></p></article>
+      <article class="identity-card values-identity"><span>القيم</span><p id="valuesText"></p></article>
+    </section>
+
     <section class="stats" id="stats"></section>
 
     <section id="nextOpportunitySection" class="next-opportunity-section" hidden>
@@ -75,14 +81,10 @@
       <div class="program-grid" id="programGrid"></div>
     </section>
 
-    <section id="opportunities" class="section-block two-col">
-      <div class="card padded">
+    <section id="opportunities" class="section-block">
+      <div class="card padded opportunity-public-card">
         <div class="section-head"><h2>الفرص والمسابقات القادمة</h2></div>
         <div id="opportunityList" class="list-stack"></div>
-      </div>
-      <div class="card padded vision-card">
-        <div class="section-head"><h2>رؤية المنصة</h2></div>
-        <p id="visionText" class="large-text">بيئة رقمية محفزة لرعاية الموهوبات واكتشاف قدراتهن وتعزيز فرصهن النوعية وصناعة مستقبل واعد.</p>
       </div>
     </section>
 
@@ -106,6 +108,6 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=9.6.0"></script>
+  <script src="app.js?v=10.0.0"></script>
 </body>
 </html>
