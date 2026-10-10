@@ -478,8 +478,19 @@ async function initPublic(){
   try{await loadPublicData(false);renderPublic()}catch(e){console.error(e);cloudData=structuredClone(FALLBACK);renderPublic();alert('تعذر الاتصال بقاعدة البيانات مؤقتًا.')}finally{clearBusy()}
 }
 
-document.getElementById('navToggle')?.addEventListener('click',()=>{const nav=document.getElementById('navLinks');const btn=document.getElementById('navToggle');const open=nav.classList.toggle('open');btn?.setAttribute('aria-expanded',String(open));btn?.classList.toggle('is-open',open)});
-document.querySelectorAll('#navLinks a').forEach(a=>a.addEventListener('click',()=>document.getElementById('navLinks')?.classList.remove('open')));
+function setPublicNav(open){
+  const nav=document.getElementById('navLinks'),btn=document.getElementById('navToggle');
+  if(!nav||!btn)return;
+  nav.classList.toggle('open',!!open);
+  btn.setAttribute('aria-expanded',String(!!open));
+  btn.classList.toggle('is-open',!!open);
+  btn.setAttribute('aria-label',open?'إغلاق القائمة':'فتح القائمة');
+}
+const publicNavToggle=document.getElementById('navToggle');
+publicNavToggle?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();setPublicNav(!document.getElementById('navLinks')?.classList.contains('open'))});
+document.querySelectorAll('#navLinks a').forEach(a=>a.addEventListener('click',()=>setPublicNav(false)));
+document.addEventListener('click',e=>{if(!matchMedia('(max-width:760px)').matches)return;if(!document.getElementById('navLinks')?.classList.contains('open'))return;if(e.target.closest('.public-nav'))return;setPublicNav(false)});
+window.addEventListener('resize',()=>{if(!matchMedia('(max-width:760px)').matches)setPublicNav(false)});
 
 // تحسينات الاستخدام على الجوال: تثبيت الخلفية في النوافذ المنبثقة وقائمة لوحة التحكم.
 const editorDialogEl=document.getElementById('editorDialog');

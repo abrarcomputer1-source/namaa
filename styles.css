@@ -827,3 +827,43 @@ dialog{max-height:min(88dvh,760px);overflow:hidden}
   .print-signatures{margin-top:12mm!important}
 }
 .attention-badge{display:inline-flex;margin-top:7px;padding:5px 9px;border-radius:999px;background:#fff4df;color:#9b6410;border:1px solid #f2dfb5;font-size:11px;font-weight:900}
+
+/* ==============================
+   V11.1 — ضبط قائمة الجوال وتوازن البطاقات
+   ============================== */
+/* بطاقات البرامج: محتوى متوازن بدون استطالة زائدة على الكمبيوتر */
+.program-grid{align-items:flex-start!important}
+.program-grid .program-card{height:auto!important;align-self:flex-start}
+.program-cover.clear-cover{height:168px!important;border-bottom:1px solid #edf3f7}
+.program-body{padding:16px 17px 17px!important}
+.program-body h3{margin:8px 0 6px!important;font-size:20px!important;line-height:1.55}
+.program-body p{min-height:0!important;margin:0!important;font-size:14px!important;line-height:1.75!important;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden}
+.program-body small{margin-top:7px!important}
+.program-body .btn{padding:9px 13px}
+
+/* الإنجازات: البطاقة تتبع حجم محتواها بدل تمديدها */
+.achievement-grid{align-items:start!important}
+.achievement-celebrate{min-height:0!important;height:auto!important;align-self:start}
+.achievement-image{height:155px!important}
+.achievement-content{padding:18px 19px 19px!important}
+.achievement-content h3{font-size:20px!important;line-height:1.55;margin:9px 0 6px!important}
+.achievement-content p{font-size:14px!important;line-height:1.75!important;margin:0}
+.achievement-link{margin-top:10px!important}
+
+@media(max-width:760px){
+  /* زر القائمة أعلى اليسار، واضح وقابل للمس */
+  .public-nav{position:sticky!important;top:4px;z-index:60!important;display:flex!important;justify-content:flex-start!important;align-items:center;padding:7px 8px!important;min-height:54px}
+  .nav-toggle{display:flex!important;width:46px!important;height:42px!important;padding:0!important;margin-left:0!important;margin-right:auto!important;justify-content:center!important;align-items:center!important;position:relative;z-index:62;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  .nav-toggle:active{transform:scale(.97)}
+  .nav-links{z-index:61!important;top:calc(100% + 5px)!important}
+  .program-cover.clear-cover{height:180px!important}
+  .program-body{padding:16px!important}
+  .program-body p{-webkit-line-clamp:5}
+  .achievement-image{height:175px!important}
+  .achievement-content{padding:17px!important}
+}
+
+@media(min-width:761px) and (max-width:1100px){
+  .program-cover.clear-cover{height:175px!important}
+  .achievement-image{height:170px!important}
+}
