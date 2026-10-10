@@ -7,13 +7,13 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>لوحة تحكم نماء</title>
-  <link rel="stylesheet" href="styles.css?v=10.0.0" />
+  <link rel="stylesheet" href="styles.css?v=11.0.0" />
 </head>
 <body class="admin-body">
   <div class="admin-shell">
     <aside class="sidebar" id="adminSidebar">
       <div class="side-brand">
-        <img src="assets/mawhiba-logo.png?v=10.0.0" alt="موهبة" />
+        <img src="assets/mawhiba-logo.png?v=11.0.0" alt="موهبة" />
         <strong>نماء</strong>
         <small>لوحة التحكم</small>
       </div>
@@ -120,6 +120,7 @@
 
       <section data-panel="programs" class="admin-panel">
         <div class="section-head admin-head"><h2>إدارة البرامج والإعلانات</h2><button class="btn primary edit-only" id="addProgramBtn">+ إضافة مربع / إعلان</button></div>
+        <div class="plan-tools card padded archive-tools"><label>عرض البرامج<select id="programArchiveFilter"><option value="active">النشطة</option><option value="archived">الأرشيف</option><option value="all">الكل</option></select></label></div>
         <div id="programTableWrap" class="card padded"></div>
       </section>
 
@@ -135,9 +136,9 @@
 
       <section data-panel="stats" class="admin-panel">
         <div class="card padded form-card wide-card edit-only-block"><h2>الإحصائيات</h2>
-          <p class="admin-note">يمكنك تعديل محتوى المربعات الإحصائية، وتنعكس مباشرة في الواجهة العامة.</p>
-          <label>عدد البرامج <input type="number" id="sPrograms" min="0" /></label>
-          <label>عدد المسجلات <input type="number" id="sRegistered" min="0" /></label>
+          <p class="admin-note">عدد البرامج المنفذة وعدد المسجلات يُحسبان تلقائيًا من الخطة الفصلية، ويمكن تحويل أي منهما إلى تعديل يدوي عند الحاجة.</p>
+          <label class="auto-stat-row"><span>عدد البرامج المنفذة</span><span class="auto-toggle"><input type="checkbox" id="sProgramsAuto" checked> تلقائي</span><input type="number" id="sPrograms" min="0" /></label>
+          <label class="auto-stat-row"><span>عدد المسجلات</span><span class="auto-toggle"><input type="checkbox" id="sRegisteredAuto" checked> تلقائي</span><input type="number" id="sRegistered" min="0" /></label>
           <label>عدد المشاركات <input type="number" id="sParticipants" min="0" /></label>
           <label>عدد الموهوبات <input type="number" id="sGifted" min="0" /></label>
           <button class="btn primary save-btn" data-save="stats">حفظ الإحصائيات</button>
@@ -184,6 +185,6 @@
   </dialog>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=10.0.0"></script>
+  <script src="app.js?v=11.0.0"></script>
 </body>
 </html>

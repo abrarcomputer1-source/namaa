@@ -25,6 +25,7 @@ let currentRole = 'viewer';
 let currentProfile = null;
 let editContext = null;
 let removeAssignmentRequested = false;
+let currentProgramFilter = 'active';
 
 function esc(s=''){return String(s).replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]))}
 function avgProgress(plan){return plan.length?Math.round(plan.reduce((s,p)=>s+(+p.progress||0),0)/plan.length):0}
@@ -130,9 +131,9 @@ async function loadPublicData(includePlan=false){
       assignmentFileType:s.assignment_file_type||'',
       assignmentFileUrl:''
     },
-    stats:{programs:st.programs_count??0,registered:st.registered_count??0,participants:st.participants_count??0,gifted:st.gifted_count??0},statsId:st.id||null,
+    stats:{programs:st.programs_count??0,registered:st.registered_count??0,participants:st.participants_count??0,gifted:st.gifted_count??0,programsAuto:st.programs_auto!==false,registeredAuto:st.registered_auto!==false},statsId:st.id||null,
     programs:(programsRes.data||[]).map(p=>({id:p.id,title:p.title,desc:p.description||'',date:p.program_date||'',status:p.status||'',url:p.external_url||'',coverImage:p.cover_image_url||'',published:p.is_published,sort:p.sort_order,archived:!!p.archived})),
-    opportunities:(oppsRes.data||[]).map(o=>({id:o.id,title:o.title,date:o.opportunity_date||'',url:o.external_url||'',published:o.is_published,sort:o.sort_order,planItemId:o.plan_item_id||''})),
+    opportunities:(oppsRes.data||[]).map(o=>({id:o.id,title:o.title,date:o.opportunity_date||'',registrationEnd:o.registration_end_date||o.opportunity_date||'',url:o.external_url||'',published:o.is_published,sort:o.sort_order,planItemId:o.plan_item_id||''})),
     achievements:(achRes.data||[]).map(a=>({id:a.id,title:a.title,note:a.description||'',image:a.image_url||'',evidence:a.evidence_url||'',published:a.is_published,sort:a.sort_order})),
     links:(linksRes.data||[]).map(l=>({id:l.id,title:l.title,url:l.url,published:l.is_published,sort:l.sort_order})),plan:[]
   };
@@ -143,9 +144,9 @@ async function loadPublicData(includePlan=false){
       id:p.id,title:p.title,date:p.plan_date||'',dateFrom:p.date_from||p.plan_date||'',dateTo:p.date_to||'',status:p.status||'',progress:p.progress||0,notes:p.notes||'',sort:p.sort_order,
       registeredCount:p.registered_count,updatedAt:p.updated_at||'',reportPath:p.report_pdf_path||'',reportName:p.report_file_name||'',reportUrl:''
     }));
-    const {data:stepsData,error:stepsError}=await sb.from('executive_plan_steps').select('id,plan_item_id,procedure_text,phase_timing,responsible,evidence_options,completion_percent,executed,reason,updated_at,sort_order').order('sort_order');
+    const {data:stepsData,error:stepsError}=await sb.from('executive_plan_steps').select('id,plan_item_id,procedure_text,phase_timing,phase_date,responsible,evidence_options,completion_percent,executed,reason,updated_at,sort_order').order('sort_order');
     if(stepsError) throw stepsError;
-    cloudData.execSteps=(stepsData||[]).map(s=>({id:s.id,planItemId:s.plan_item_id,procedure:s.procedure_text||'',phase:s.phase_timing||'',responsible:s.responsible||'',evidence:Array.isArray(s.evidence_options)?s.evidence_options:[],completion:s.completion_percent,executed:s.executed,reason:s.reason||'',updatedAt:s.updated_at||'',sort:s.sort_order}));
+    cloudData.execSteps=(stepsData||[]).map(s=>({id:s.id,planItemId:s.plan_item_id,procedure:s.procedure_text||'',phase:s.phase_timing||'',phaseDate:s.phase_date||'',responsible:s.responsible||'',evidence:Array.isArray(s.evidence_options)?s.evidence_options:[],completion:s.completion_percent,executed:s.executed,reason:s.reason||'',updatedAt:s.updated_at||'',sort:s.sort_order}));
     cloudData.basic.assignmentFileUrl=await privateFileUrl(cloudData.basic.assignmentFilePath);
     await Promise.all(cloudData.plan.map(async p=>{p.reportUrl=await privateFileUrl(p.reportPath)}));
   }
@@ -165,11 +166,18 @@ function formatLastUpdated(value){
 }
 
 function normalizeDigits(v=''){return String(v).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d))}
+const AR_MONTHS={
+  'يناير':1,'فبراير':2,'مارس':3,'أبريل':4,'ابريل':4,'مايو':5,'يونيو':6,'يوليو':7,'أغسطس':8,'اغسطس':8,'سبتمبر':9,'أكتوبر':10,'اكتوبر':10,'نوفمبر':11,'ديسمبر':12
+};
 function dateTuple(value=''){
-  const s=normalizeDigits(value).replace(/هـ|ه/g,'').trim();
-  const m=s.match(/(\d{1,2})\s*[\/\-]\s*(\d{1,2})\s*[\/\-]\s*(\d{4})/);
-  if(!m)return null;
-  return {d:+m[1],m:+m[2],y:+m[3]};
+  const s=normalizeDigits(value).replace(/هـ|ه/g,'').replace(/،/g,' ').trim();
+  let all=[...s.matchAll(/(\d{1,2})\s*[\/\-]\s*(\d{1,2})\s*[\/\-]\s*(\d{4})/g)];
+  if(all.length){const m=all[all.length-1];return {d:+m[1],m:+m[2],y:+m[3]}}
+  all=[...s.matchAll(/(\d{4})\s*[\/\-]\s*(\d{1,2})\s*[\/\-]\s*(\d{1,2})/g)];
+  if(all.length){const m=all[all.length-1];return {d:+m[3],m:+m[2],y:+m[1]}}
+  const monthExpr=[...s.matchAll(/(\d{1,2})\s+([\u0600-\u06FF]+)(?:\s+(\d{4}))?/g)].filter(m=>AR_MONTHS[m[2]]);
+  if(monthExpr.length){const m=monthExpr[monthExpr.length-1];let y=m[3]?+m[3]:null;if(!y){const ym=s.match(/(\d{4})(?!.*\d)/);y=ym?+ym[1]:null}if(y)return {d:+m[1],m:AR_MONTHS[m[2]],y}}
+  return null;
 }
 function todayTupleForYear(y){
   if(y<1700){
@@ -184,6 +192,8 @@ function isExpiredDate(value){
   const t=dateTuple(value);if(!t)return false;
   return tupleCompare(t,todayTupleForYear(t.y))<0;
 }
+function daysUntilDate(value){const t=dateTuple(value);if(!t||t.y<1700)return null;const target=Date.UTC(t.y,t.m-1,t.d),now=new Date(),today=Date.UTC(now.getFullYear(),now.getMonth(),now.getDate());return Math.round((target-today)/86400000)}
+function attentionState(p){const days=daysUntilDate(p.dateTo||p.dateFrom||p.date);const progress=Number(p.progress)||0;if(days===null)return '';if(days<0&&progress<90)return 'متأخر ويحتاج استكمال';if(days<=14&&days>=0&&progress<50)return 'موعد قريب — يحتاج متابعة';return ''}
 function progressTone(v){v=Number(v)||0;return v>=90?'progress-green':v>=50?'progress-yellow':'progress-red'}
 function progressMeter(v,label=true){
   v=Math.max(0,Math.min(100,Number(v)||0));
@@ -203,20 +213,21 @@ function renderPublic(){
   heroTitle.textContent=d.heroTitle;heroText.textContent=d.heroText;
   if(document.getElementById('visionText')) visionText.textContent=d.vision;
   if(document.getElementById('messageText')) messageText.textContent=d.message||FALLBACK.message;
-  if(document.getElementById('valuesText')) valuesText.textContent=d.values||FALLBACK.values;
+  if(document.getElementById('valuesText')){const vals=String(d.values||FALLBACK.values).split(/[•،,|\n]/).map(x=>x.trim()).filter(Boolean);valuesText.innerHTML=vals.map(v=>`<span>${esc(v)}</span>`).join('')}
   footerCoordinator.textContent=`منسقة الموهوبات: ${d.basic.coordinator}`;
   footerPrincipal.textContent=`مديرة المدرسة: ${d.basic.principal}`;
   if(document.getElementById('footerLastUpdated')) footerLastUpdated.textContent=d.updatedAt?`آخر تحديث: ${formatLastUpdated(d.updatedAt)}`:'';
   const hm=document.getElementById('heroMedia');
-  const heroBg=d.heroImage?publicMediaUrl(d.heroImage):'assets/hero-gifted-future.png?v=10.0.0';
+  const heroBg=d.heroImage?publicMediaUrl(d.heroImage):'assets/hero-gifted-future.png?v=11.0.0';
   hm.style.backgroundImage=`linear-gradient(180deg,rgba(17,59,106,.02),rgba(17,59,106,.06)),url('${esc(heroBg)}')`;
-  stats.innerHTML=[['البرامج',d.stats.programs],['المسجلات',d.stats.registered],['المشاركات',d.stats.participants],['الموهوبات',d.stats.gifted]].map((x,i)=>`<div class="stat"><span class="stat-index">${String(i+1).padStart(2,'0')}</span><div class="stat-copy"><b>${esc(x[1])}</b><span>${esc(x[0])}</span></div></div>`).join('');
-  const availableOpps=(d.opportunities||[]).filter(o=>!isExpiredDate(o.date));
+  stats.innerHTML=[['البرامج المنفذة',d.stats.programs],['المسجلات',d.stats.registered],['المشاركات',d.stats.participants],['الموهوبات',d.stats.gifted]].map((x,i)=>`<div class="stat"><span class="stat-index">${String(i+1).padStart(2,'0')}</span><div class="stat-copy"><b>${esc(x[1])}</b><span>${esc(x[0])}</span></div></div>`).join('');
+  const availableOpps=(d.opportunities||[]).filter(o=>!isExpiredDate(o.registrationEnd||o.date)).sort((a,b)=>{const ta=dateTuple(a.registrationEnd||a.date),tb=dateTuple(b.registrationEnd||b.date);if(!ta&&!tb)return 0;if(!ta)return 1;if(!tb)return -1;return tupleCompare(ta,tb)});
   const next=availableOpps[0];
   const nextSec=document.getElementById('nextOpportunitySection');
-  if(next&&nextSec){nextSec.hidden=false;nextOpportunityTitle.textContent=next.title;nextOpportunityDate.textContent=next.date||'';if(next.url){nextOpportunityLink.href=next.url;nextOpportunityLink.hidden=false}else nextOpportunityLink.hidden=true}else if(nextSec) nextSec.hidden=true;
+  if(next&&nextSec){nextSec.hidden=false;nextOpportunityTitle.textContent=next.title;nextOpportunityDate.textContent=next.registrationEnd?`التسجيل متاح حتى ${next.registrationEnd}`:(next.date||'');if(next.url){nextOpportunityLink.href=next.url;nextOpportunityLink.hidden=false}else nextOpportunityLink.hidden=true}else if(nextSec) nextSec.hidden=true;
 
   const activePrograms=d.programs.filter(p=>!p.archived);
+  programGrid.className=`program-grid program-count-${Math.min(activePrograms.length,6)}`;
   programGrid.innerHTML=activePrograms.map((p,i)=>{
     const img=publicMediaUrl(p.coverImage);
     return `<article class="program-card">
@@ -224,7 +235,7 @@ function renderPublic(){
       <div class="program-body"><span class="tag ${statusClass(p.status)}">${esc(p.status||'متاح')}</span><h3>${esc(p.title)}</h3><p>${esc(p.desc)}</p><small>${esc(p.date)}</small><div style="margin-top:13px">${p.url?`<a class="btn secondary" target="_blank" rel="noopener" href="${esc(p.url)}">التفاصيل والرابط</a>`:''}</div></div>
     </article>`}).join('')||'<div class="card padded">لا توجد برامج منشورة حاليًا.</div>';
 
-  opportunityList.innerHTML=availableOpps.map((o,i)=>`<div class="list-item clean-list"><span class="item-index">${String(i+1).padStart(2,'0')}</span><div style="flex:1"><strong>${esc(o.title)}</strong><div class="opportunity-date">${esc(o.date)}</div>${o.url?`<div class="hint"><a class="inline-link" target="_blank" rel="noopener" href="${esc(o.url)}">فتح الرابط</a></div>`:''}</div></div>`).join('')||'<div class="list-item">لا توجد فرص متاحة حاليًا.</div>';
+  opportunityList.innerHTML=availableOpps.map((o,i)=>`<div class="list-item clean-list"><span class="item-index">${String(i+1).padStart(2,'0')}</span><div style="flex:1"><strong>${esc(o.title)}</strong><div class="opportunity-date">${esc(o.registrationEnd?`التسجيل حتى ${o.registrationEnd}`:o.date)}</div>${o.url?`<div class="hint"><a class="inline-link" target="_blank" rel="noopener" href="${esc(o.url)}">فتح الرابط</a></div>`:''}</div></div>`).join('')||'<div class="list-item">لا توجد فرص متاحة حاليًا.</div>';
 
   const achievementCards=d.achievements.map((a,i)=>{const img=publicMediaUrl(a.image);return `<article class="achievement achievement-celebrate">${img?`<div class="achievement-image" style="background-image:url('${esc(img)}')"></div>`:''}<div class="achievement-content"><span class="achievement-star" aria-hidden="true">★</span><span class="achievement-no">${String(i+1).padStart(2,'0')}</span><h3>${esc(a.title)}</h3><p>${esc(a.note)}</p>${a.evidence?`<a class="achievement-link" href="${esc(a.evidence)}" target="_blank" rel="noopener">عرض الشاهد</a>`:''}</div></article>`}).join('');
   achievementGrid.innerHTML=achievementCards||'<div class="achievement"><h3>قريبًا</h3><p>ستظهر الإنجازات هنا بعد إضافتها.</p></div>';
@@ -265,11 +276,10 @@ function renderPlanTable(){
     if(currentPlanFilter==='needs-completion')return planCompleteness(p)==='يحتاج استكمال';
     return true;
   });
-  wrap.innerHTML=table(['البند','الفترة','المسجلات','الحالة','الإنجاز','اكتمال البيانات','التقرير','الخطة التنفيذية','طباعة','إجراءات'],rows.map(p=>[
+  wrap.innerHTML=table(['البند','الفترة','المسجلات','الحالة','الإنجاز','اكتمال البيانات','التقرير','الخطة التنفيذية','إجراءات'],rows.map(p=>[
     esc(p.title),dateRangeHtml(p),p.registeredCount??'—',`<span class="status-pill">${esc(p.status)}</span>`,progressMeter(p.progress),
     `<span class="completeness ${planCompleteness(p)==='مكتمل البيانات'?'complete':'incomplete'}">${planCompleteness(p)}</span><small class="last-update">آخر تحديث: ${esc(formatLastUpdated(p.updatedAt)||'—')}</small>`,
-    reportButton(p),`<a class="action-btn executive-plan-link" href="executive-plan.html?plan_id=${encodeURIComponent(p.id)}">فتح الخطة</a>`,
-    `<a class="action-btn" target="_blank" href="print-program.html?plan_id=${encodeURIComponent(p.id)}">ملخص A4</a>`,actions('plan',p.id)
+    reportButton(p),`<a class="action-btn executive-plan-link" href="executive-plan.html?plan_id=${encodeURIComponent(p.id)}">فتح الخطة</a>`,actions('plan',p.id)
   ]));
   if(!rows.length) wrap.innerHTML='<div class="empty-state">لا توجد بنود مطابقة للتصفية الحالية.</div>';
 }
@@ -301,19 +311,20 @@ function renderAdmin(){
   const reportCount=d.plan.filter(x=>x.reportPath).length;
   dashboardStats.innerHTML=[['نسبة تنفيذ الخطة',avg+'%'],['مكتملة 90–100%',d.plan.filter(x=>x.progress>=90).length],['تحتاج استكمال',d.plan.filter(x=>planCompleteness(x)==='يحتاج استكمال').length],['إجمالي المسجلات',d.plan.reduce((s,x)=>s+(Number(x.registeredCount)||0),0)]].map((x,i)=>`<div class="stat"><span class="stat-index">${String(i+1).padStart(2,'0')}</span><div class="stat-copy"><b>${esc(x[1])}</b><span>${esc(x[0])}</span></div></div>`).join('');
   overallProgress.textContent=avg+'%';progressBar.style.width=avg+'%';
-  planMiniList.innerHTML=d.plan.map(p=>`<div class="list-item"><div><strong>${esc(p.title)}</strong><div class="hint">${esc(p.dateFrom||p.date||'')} ${p.dateTo?`— ${esc(p.dateTo)}`:''}</div></div><div class="mini-progress">${progressMeter(p.progress,false)}<strong>${p.progress}%</strong></div></div>`).join('')||'<div class="list-item">لم تتم إضافة بنود للخطة بعد.</div>';
+  planMiniList.innerHTML=d.plan.map(p=>{const alert=attentionState(p);return `<div class="list-item"><div><strong>${esc(p.title)}</strong><div class="hint">${esc(p.dateFrom||p.date||'')} ${p.dateTo?`— ${esc(p.dateTo)}`:''}</div>${alert?`<span class="attention-badge">${esc(alert)}</span>`:''}</div><div class="mini-progress">${progressMeter(p.progress,false)}<strong>${p.progress}%</strong></div></div>`}).join('')||'<div class="list-item">لم تتم إضافة بنود للخطة بعد.</div>';
   followupList.innerHTML=d.plan.map(p=>`<div class="list-item"><div><strong>${esc(p.title)}</strong><div style="color:#64748b;margin-top:5px">${esc(p.status)} • ${esc(p.dateFrom||p.date||'')} ${p.dateTo?`إلى ${esc(p.dateTo)}`:''}</div>${p.notes?`<div class="hint">${esc(p.notes)}</div>`:''}<div class="followup-report">${reportButton(p)}</div></div><div class="followup-progress">${progressMeter(p.progress)}</div></div>`).join('');
   renderPlanTable();
-  programTableWrap.innerHTML=table(['البرنامج / الإعلان','التاريخ','الحالة','الأرشيف','الخلفية','إجراءات'],d.programs.map(p=>[esc(p.title),esc(p.date),esc(p.status),p.archived?'<span class="tag status-ended">مؤرشف</span>':'نشط',p.coverImage?'مضافة':'افتراضية',actions('programs',p.id)]));
-  opportunitiesTableWrap.innerHTML=table(['الفرصة / المسابقة','التاريخ','الرابط','إجراءات'],d.opportunities.map(o=>[esc(o.title),esc(o.date),o.url?`<a class="inline-link" target="_blank" href="${esc(o.url)}">فتح</a>`:'—',actions('opportunities',o.id)]));
+  if(document.getElementById('programArchiveFilter'))programArchiveFilter.value=currentProgramFilter;
+  const shownPrograms=d.programs.filter(p=>currentProgramFilter==='all'||(currentProgramFilter==='archived'?p.archived:!p.archived));programTableWrap.innerHTML=table(['البرنامج / الإعلان','التاريخ','الحالة','الأرشيف','الخلفية','إجراءات'],shownPrograms.map(p=>[esc(p.title),esc(p.date),esc(p.status),p.archived?'<span class="tag status-ended">مؤرشف</span>':'<span class="tag status-open">نشط</span>',p.coverImage?'مضافة':'افتراضية',actions('programs',p.id)]));
+  opportunitiesTableWrap.innerHTML=table(['الفرصة / المسابقة','نهاية التسجيل','الحالة','الرابط','إجراءات'],d.opportunities.map(o=>[esc(o.title),esc(o.registrationEnd||o.date),isExpiredDate(o.registrationEnd||o.date)?'<span class="tag status-ended">انتهى التسجيل</span>':'<span class="tag status-open">متاح</span>',o.url?`<a class="inline-link" target="_blank" href="${esc(o.url)}">فتح</a>`:'—',actions('opportunities',o.id)]));
   achievementTableWrap.innerHTML=table(['الإنجاز','ملاحظة','إجراءات'],d.achievements.map(a=>[esc(a.title),esc(a.note),actions('achievements',a.id)]));
   linksTableWrap.innerHTML=table(['العنوان','الرابط','إجراءات'],d.links.map(l=>[esc(l.title),`<a class="inline-link" target="_blank" href="${esc(l.url)}">فتح الرابط</a>`,actions('links',l.id)]));
   fHeroTitle.value=d.heroTitle;fHeroText.value=d.heroText;fVision.value=d.vision;if(document.getElementById('fMessage'))document.getElementById('fMessage').value=d.message||'';if(document.getElementById('fValues'))document.getElementById('fValues').value=d.values||'';fHeroImageUrl.value=d.heroImage||'';setPreview(heroPreview,publicMediaUrl(d.heroImage));
   fSchool.value=d.basic.school;fCoordinator.value=d.basic.coordinator;fPrincipal.value=d.basic.principal;fSemester.value=d.basic.semester;fAssignment.value=d.basic.assignment;
-  sPrograms.value=d.stats.programs;sRegistered.value=d.stats.registered;sParticipants.value=d.stats.participants;sGifted.value=d.stats.gifted;
+  sPrograms.value=d.stats.programs;sRegistered.value=d.stats.registered;sParticipants.value=d.stats.participants;sGifted.value=d.stats.gifted;if(document.getElementById('sProgramsAuto')){sProgramsAuto.checked=d.stats.programsAuto!==false;sPrograms.disabled=sProgramsAuto.checked}if(document.getElementById('sRegisteredAuto')){sRegisteredAuto.checked=d.stats.registeredAuto!==false;sRegistered.disabled=sRegisteredAuto.checked}
   renderBasicSummary();
   renderAssignmentUploadPreview();
-  statsViewer.innerHTML=`<h3 class="viewer-card-title">الإحصائيات الحالية</h3><div class="stats-viewer-grid"><div class="info-tile"><small>البرامج</small><strong>${d.stats.programs}</strong></div><div class="info-tile"><small>المسجلات</small><strong>${d.stats.registered}</strong></div><div class="info-tile"><small>المشاركات</small><strong>${d.stats.participants}</strong></div><div class="info-tile"><small>الموهوبات</small><strong>${d.stats.gifted}</strong></div></div>`;
+  statsViewer.innerHTML=`<h3 class="viewer-card-title">الإحصائيات الحالية</h3><div class="stats-viewer-grid"><div class="info-tile"><small>البرامج المنفذة</small><strong>${d.stats.programs}</strong></div><div class="info-tile"><small>المسجلات</small><strong>${d.stats.registered}</strong></div><div class="info-tile"><small>المشاركات</small><strong>${d.stats.participants}</strong></div><div class="info-tile"><small>الموهوبات</small><strong>${d.stats.gifted}</strong></div></div>`;
 }
 function setPreview(img,value){if(!img)return;const box=img.closest('.preview-box');if(value){img.src=value;box?.classList.add('has-image')}else{img.removeAttribute('src');box?.classList.remove('has-image')}}
 function renderAssignmentUploadPreview(){
@@ -326,9 +337,9 @@ function renderAssignmentUploadPreview(){
 }
 
 function dialogContent(type,item={}){
-  if(type==='plan')return `<div class="dialog-fields-grid"><label class="full">اسم البند<input name="title" value="${esc(item.title||'')}"></label><label>التاريخ من<input name="dateFrom" value="${esc(item.dateFrom||item.date||'')}" placeholder="مثال: 1/4/1448هـ"></label><label>التاريخ إلى<input name="dateTo" value="${esc(item.dateTo||'')}" placeholder="مثال: 15/4/1448هـ"></label><label>الحالة<input name="status" value="${esc(item.status||'')}"></label><label>عدد المسجلات<input name="registeredCount" type="number" min="0" value="${item.registeredCount??''}" placeholder="اتركيه فارغًا حتى يتوفر العدد"></label><label>نسبة الإنجاز المحسوبة<input name="progressDisplay" value="${esc(item.progress??0)}%" readonly></label><label class="full">ملاحظات<textarea name="notes" rows="3">${esc(item.notes||'')}</textarea></label><label class="full">تقرير البند PDF<span class="file-pick">اختيار ملف PDF<input name="reportFile" type="file" accept="application/pdf"></span><div class="hint">الحد الأقصى 50MB. ${item.reportPath?`يوجد تقرير حالي: ${esc(item.reportName||'تقرير.pdf')}`:'لا يوجد تقرير مرفوع حاليًا.'}</div></label>${item.reportPath?`<label class="checkbox-row"><input name="removeReport" type="checkbox" value="1"> إزالة التقرير الحالي عند الحفظ</label>`:''}</div>`;
+  if(type==='plan')return `<div class="dialog-fields-grid"><label class="full">اسم البند<input name="title" value="${esc(item.title||'')}"></label><label>التاريخ من<input name="dateFrom" value="${esc(item.dateFrom||item.date||'')}" placeholder="مثال: 5 أكتوبر 2026"></label><label>التاريخ إلى<input name="dateTo" value="${esc(item.dateTo||'')}" placeholder="مثال: 20 أكتوبر 2026"></label><label>الحالة<input name="status" value="${esc(item.status||'')}"></label><label>عدد المسجلات<input name="registeredCount" type="number" min="0" value="${item.registeredCount??''}" placeholder="اتركيه فارغًا حتى يتوفر العدد"></label><label>نسبة الإنجاز المحسوبة<input name="progressDisplay" value="${esc(item.progress??0)}%" readonly></label><label class="full">ملاحظات<textarea name="notes" rows="3">${esc(item.notes||'')}</textarea></label><label class="full">تقرير البند PDF<span class="file-pick">اختيار ملف PDF<input name="reportFile" type="file" accept="application/pdf"></span><div class="hint">الحد الأقصى 50MB. ${item.reportPath?`يوجد تقرير حالي: ${esc(item.reportName||'تقرير.pdf')}`:'لا يوجد تقرير مرفوع حاليًا.'}</div></label>${item.reportPath?`<label class="checkbox-row"><input name="removeReport" type="checkbox" value="1"> إزالة التقرير الحالي عند الحفظ</label>`:''}</div>`;
   if(type==='programs')return `<div class="dialog-fields-grid"><label class="full">اسم البرنامج / الإعلان<input name="title" value="${esc(item.title||'')}"></label><label>التاريخ<input name="date" value="${esc(item.date||'')}"></label><label>الحالة<input name="status" value="${esc(item.status||'')}"></label><label class="full">الوصف<textarea name="desc" rows="4">${esc(item.desc||'')}</textarea></label><label class="full">الرابط<input name="url" type="url" value="${esc(item.url||'')}"></label><label class="full">رابط صورة / خلفية<input name="coverImage" value="${esc(item.coverImage||'')}"></label><label class="full">أو ارفعي صورة من الجهاز<span class="file-pick">اختيار صورة<input type="file" accept="image/*" data-upload="program"></span></label><div class="preview-box full ${item.coverImage?'has-image':''}"><img id="dialogImagePreview" ${item.coverImage?`src="${esc(publicMediaUrl(item.coverImage))}"`:''} alt="معاينة"></div></div>`;
-  if(type==='opportunities'){const opts=['<option value="">بدون ربط — استخدمي التاريخ اليدوي</option>',...cloudData.plan.map(p=>`<option value="${p.id}" ${String(item.planItemId||'')===String(p.id)?'selected':''}>${esc(p.title)} — ${esc(p.dateTo||p.dateFrom||p.date||'')}</option>`)].join('');return `<div class="dialog-fields-grid"><label class="full">اسم الفرصة / المسابقة<input name="title" value="${esc(item.title||'')}"></label><label class="full">ربط ببند من الخطة الفصلية<select name="planItemId">${opts}</select><small class="hint">عند الربط يُستخدم تاريخ نهاية البند تلقائيًا ويتحدث إذا تغير تاريخ الخطة.</small></label><label>التاريخ اليدوي<input name="date" value="${esc(item.date||'')}" placeholder="يُستخدم فقط إذا لم تربطيها بالخطة"></label><label>الرابط<input name="url" type="url" value="${esc(item.url||'')}"></label></div>`;}
+  if(type==='opportunities'){const opts=['<option value="">بدون ربط — أدخلي نهاية التسجيل يدويًا</option>',...cloudData.plan.map(p=>`<option value="${p.id}" ${String(item.planItemId||'')===String(p.id)?'selected':''}>${esc(p.title)} — ${esc(p.dateTo||p.dateFrom||p.date||'')}</option>`)].join('');return `<div class="dialog-fields-grid"><label class="full">اسم الفرصة / المسابقة<input name="title" value="${esc(item.title||'')}"></label><label class="full">ربط ببند من الخطة الفصلية<select name="planItemId">${opts}</select><small class="hint">عند الربط تُستخدم نهاية فترة البند كنهاية للتسجيل، وتتحدث تلقائيًا إذا تغيرت الخطة.</small></label><label>نهاية التسجيل<input name="registrationEnd" value="${esc(item.registrationEnd||item.date||'')}" placeholder="مثال: 5 أكتوبر 2026"></label><label>الرابط<input name="url" type="url" value="${esc(item.url||'')}"></label></div>`;}
   if(type==='achievements')return `<div class="dialog-fields-grid"><label class="full">عنوان الإنجاز<input name="title" value="${esc(item.title||'')}"></label><label class="full">ملاحظة / وصف<textarea name="note" rows="4">${esc(item.note||'')}</textarea></label><label class="full">رابط الشاهد<input name="evidence" type="url" value="${esc(item.evidence||'')}"></label><label class="full">صورة الإنجاز<input name="achievementImage" value="${esc(item.image||'')}" placeholder="رابط صورة أو ارفعي صورة من الجهاز"></label><label class="full"><span class="file-pick">اختيار صورة<input type="file" accept="image/*" data-upload="achievement" data-target="achievementImage"></span></label><div class="preview-box full ${item.image?'has-image':''}"><img id="dialogAchievementPreview" ${item.image?`src="${esc(publicMediaUrl(item.image))}"`:''} alt="معاينة الإنجاز"></div></div>`;
   return `<div class="dialog-fields-grid"><label class="full">اسم الرابط<input name="title" value="${esc(item.title||'')}"></label><label class="full">الرابط<input name="url" type="url" value="${esc(item.url||'')}"></label></div>`;
 }
@@ -373,7 +384,7 @@ async function saveSimple(type){
       if(oldPath && oldPath!==path) await deletePrivateFile(oldPath);
       removeAssignmentRequested=false;fAssignmentFile.value='';
     }else if(type==='stats'){
-      const payload={programs_count:+sPrograms.value||0,registered_count:+sRegistered.value||0,participants_count:+sParticipants.value||0,gifted_count:+sGifted.value||0,updated_at:new Date().toISOString()};
+      const programsAuto=document.getElementById('sProgramsAuto')?.checked!==false,registeredAuto=document.getElementById('sRegisteredAuto')?.checked!==false;const autoPrograms=cloudData.plan.filter(x=>Number(x.progress)>=90).length,autoRegistered=cloudData.plan.reduce((sum,x)=>sum+(Number(x.registeredCount)||0),0);const payload={programs_count:programsAuto?autoPrograms:(+sPrograms.value||0),registered_count:registeredAuto?autoRegistered:(+sRegistered.value||0),participants_count:+sParticipants.value||0,gifted_count:+sGifted.value||0,programs_auto:programsAuto,registered_auto:registeredAuto,updated_at:new Date().toISOString()};
       const q=cloudData.statsId?sb.from('statistics').update(payload).eq('id',cloudData.statsId):sb.from('statistics').insert(payload);const {error}=await q;if(error)throw error;
     }
     await touchSiteUpdatedAt();
@@ -429,6 +440,9 @@ async function setupAdmin(){
   clearHeroImageBtn.addEventListener('click',()=>{fHeroImageUrl.value='';fHeroImageFile.value='';setPreview(heroPreview,'')});
   fHeroImageFile.addEventListener('change',()=>{const f=fHeroImageFile.files?.[0];if(f)setPreview(heroPreview,URL.createObjectURL(f))});
   fAssignmentFile.addEventListener('change',()=>{removeAssignmentRequested=false;try{validatePrivateFile(fAssignmentFile.files?.[0],'assignment');renderAssignmentUploadPreview()}catch(e){fAssignmentFile.value='';alert(e.message)}});
+  document.getElementById('programArchiveFilter')?.addEventListener('change',e=>{currentProgramFilter=e.target.value;renderAdmin()});
+  document.getElementById('sProgramsAuto')?.addEventListener('change',e=>{sPrograms.disabled=e.target.checked;if(e.target.checked)sPrograms.value=cloudData.plan.filter(x=>Number(x.progress)>=90).length});
+  document.getElementById('sRegisteredAuto')?.addEventListener('change',e=>{sRegistered.disabled=e.target.checked;if(e.target.checked)sRegistered.value=cloudData.plan.reduce((sum,x)=>sum+(Number(x.registeredCount)||0),0)});
   clearAssignmentFileBtn.addEventListener('click',()=>{fAssignmentFile.value='';removeAssignmentRequested=true;renderAssignmentUploadPreview()});
   editorDialog.addEventListener('change',async e=>{if(!e.target.matches('[data-upload]'))return;const file=e.target.files?.[0];if(!file)return;try{showCloudStatus('جارِ رفع الصورة...');const kind=e.target.dataset.upload;const folder=kind==='achievement'?'achievements':'programs';const target=e.target.dataset.target||(kind==='achievement'?'achievementImage':'coverImage');const url=await uploadPublicImage(file,folder);const inp=editorDialog.querySelector(`[name="${target}"]`);if(inp)inp.value=url;const previewId=kind==='achievement'?'dialogAchievementPreview':'dialogImagePreview';setPreview(document.getElementById(previewId),url);showCloudStatus('تم رفع الصورة')}catch(err){alert('تعذر رفع الصورة: '+err.message)}});
   editorDialog.addEventListener('change',e=>{if(e.target.name==='reportFile'&&e.target.files?.[0]){try{validatePrivateFile(e.target.files[0],'report');showCloudStatus(`تم اختيار التقرير — ${(e.target.files[0].size/1024/1024).toFixed(1)} MB`)}catch(err){e.target.value='';alert(err.message)}}});
@@ -445,7 +459,7 @@ async function setupAdmin(){
         else if(o.removeReport==='1'&&reportPath){await deletePrivateFile(reportPath);reportPath='';reportName=''}
         cfg={table:'plan_items',payload:{title:o.title,plan_date:o.dateFrom||'',date_from:o.dateFrom||'',date_to:o.dateTo||'',status:o.status||'',registered_count:o.registeredCount===''?null:Math.max(0,+o.registeredCount||0),notes:o.notes||'',report_pdf_path:reportPath||null,report_file_name:reportName||null,updated_at:new Date().toISOString()}};
       }else if(editContext.type==='programs') cfg={table:'programs',payload:{title:o.title,description:o.desc||'',program_date:o.date||'',status:o.status||'',external_url:o.url||null,cover_image_url:o.coverImage||null,is_published:true}};
-      else if(editContext.type==='opportunities') cfg={table:'opportunities',payload:{title:o.title,plan_item_id:o.planItemId||null,opportunity_date:o.planItemId?(cloudData.plan.find(p=>String(p.id)===String(o.planItemId))?.dateTo||cloudData.plan.find(p=>String(p.id)===String(o.planItemId))?.dateFrom||''):(o.date||''),external_url:o.url||null,is_published:true}};
+      else if(editContext.type==='opportunities'){const linked=cloudData.plan.find(p=>String(p.id)===String(o.planItemId));const end=o.planItemId?(linked?.dateTo||linked?.dateFrom||linked?.date||''):(o.registrationEnd||'');cfg={table:'opportunities',payload:{title:o.title,plan_item_id:o.planItemId||null,opportunity_date:end,registration_end_date:end,external_url:o.url||null,is_published:true}};}
       else if(editContext.type==='achievements') cfg={table:'achievements',payload:{title:o.title,description:o.note||'',image_url:o.achievementImage||null,evidence_url:o.evidence||null,is_published:true}};
       else cfg={table:'important_links',payload:{title:o.title,url:o.url,is_published:true}};
       const q=editContext.id?sb.from(cfg.table).update(cfg.payload).eq('id',editContext.id):sb.from(cfg.table).insert(cfg.payload);const {error}=await q;if(error)throw error;
@@ -521,7 +535,7 @@ async function setupExecutivePlan(){
     const id=isNew?'new-'+crypto.randomUUID():r.id;
     return `<tr data-id="${id}" ${isNew?'data-new="1"':''}>
       <td class="exec-num" data-label="رقم">${i+1}</td>
-      <td data-label="المرحلة والتوقيت"><input class="exec-phase" list="phaseSuggestions" value="${esc(r.phase_timing||r.phase||'')}" placeholder="مثال: الإعلان — الأسبوع الأول"><button type="button" class="copy-prev-btn screen-only" title="نسخ بيانات المرحلة السابقة">نسخ السابق</button></td>
+      <td data-label="المرحلة والتوقيت"><input class="exec-phase" list="phaseSuggestions" value="${esc(r.phase_timing||r.phase||'')}" placeholder="مثال: الإعلان"><input class="exec-phase-date" value="${esc(r.phase_date||r.phaseDate||'')}" placeholder="مثال: 5 أكتوبر 2026"><button type="button" class="copy-prev-btn screen-only" title="نسخ بيانات المرحلة السابقة">نسخ السابق</button></td>
       <td data-label="إجراءات التنفيذ"><div class="exec-row-tools"><textarea class="exec-procedure" rows="3" placeholder="اكتبي إجراءات التنفيذ">${esc(r.procedure_text||r.procedure||'')}</textarea><button type="button" class="exec-delete-mini exec-delete screen-only" title="حذف المرحلة">×</button></div></td>
       <td data-label="المسؤول"><input class="exec-responsible" value="${esc(r.responsible||currentProfile?.full_name||'منسقة الموهوبات')}" placeholder="المسؤول عن التنفيذ"></td>
       <td data-label="الشواهد">${evidenceDropdown(r.evidence_options||r.evidence||[])}</td>
@@ -531,7 +545,7 @@ async function setupExecutivePlan(){
   }
   function viewRow(r,i){
     const ev=Array.isArray(r.evidence_options)?r.evidence_options:[];
-    return `<tr><td class="exec-num" data-label="رقم">${i+1}</td><td data-label="المرحلة والتوقيت">${esc(r.phase_timing||'—')}</td><td data-label="إجراءات التنفيذ">${esc(r.procedure_text||'—')}</td><td data-label="المسؤول">${esc(r.responsible||'—')}</td><td data-label="الشواهد">${ev.length?ev.map(x=>`<span class="evidence-chip">${esc(x)}</span>`).join(' '):'—'}</td><td data-label="نسبة الإنجاز">${progressMeter(r.completion_percent??0)}</td><td data-label="التنفيذ">${r.executed===true?'نعم':r.executed===false?`لا${r.reason?` — ${esc(r.reason)}`:''}`:'—'}</td></tr>`;
+    return `<tr><td class="exec-num" data-label="رقم">${i+1}</td><td data-label="المرحلة والتوقيت"><strong>${esc(r.phase_timing||'—')}</strong>${r.phase_date?`<small class="phase-date-view">${esc(r.phase_date)}</small>`:''}</td><td data-label="إجراءات التنفيذ">${esc(r.procedure_text||'—')}</td><td data-label="المسؤول">${esc(r.responsible||'—')}</td><td data-label="الشواهد">${ev.length?ev.map(x=>`<span class="evidence-chip">${esc(x)}</span>`).join(' '):'—'}</td><td data-label="نسبة الإنجاز">${progressMeter(r.completion_percent??0)}</td><td data-label="التنفيذ">${r.executed===true?'نعم':r.executed===false?`لا${r.reason?` — ${esc(r.reason)}`:''}`:'—'}</td></tr>`;
   }
   const rowsWrap=document.getElementById('execRows');
   const rowsNow=()=>[...rowsWrap.querySelectorAll('tr[data-id]')];
@@ -546,7 +560,7 @@ async function setupExecutivePlan(){
   function snapshotDraft(){
     if(currentRole!=='admin')return;
     const rows=rowsNow().map((tr,i)=>({
-      id:tr.dataset.id,new:tr.dataset.new==='1',phase:tr.querySelector('.exec-phase')?.value||'',procedure:tr.querySelector('.exec-procedure')?.value||'',
+      id:tr.dataset.id,new:tr.dataset.new==='1',phase:tr.querySelector('.exec-phase')?.value||'',phaseDate:tr.querySelector('.exec-phase-date')?.value||'',procedure:tr.querySelector('.exec-procedure')?.value||'',
       responsible:tr.querySelector('.exec-responsible')?.value||'',evidence:readEvidence(tr),completion:tr.querySelector('.exec-percent')?.value||'',
       executed:tr.querySelector('[data-choice="yes"]')?.checked?true:tr.querySelector('[data-choice="no"]')?.checked?false:null,reason:tr.querySelector('.exec-reason')?.value||'',sort:i
     }));
@@ -569,7 +583,7 @@ async function setupExecutivePlan(){
         try{
           const d=JSON.parse(saved);
           if(d?.rows?.length && confirm('وجدت مسودة غير محفوظة لهذه الخطة. هل تريدين استعادتها؟')){
-            source=d.rows.map(x=>({id:x.id,phase_timing:x.phase,procedure_text:x.procedure,responsible:x.responsible,evidence_options:x.evidence,completion_percent:x.completion===''?null:+x.completion,executed:x.executed,reason:x.reason,__new:x.new}));
+            source=d.rows.map(x=>({id:x.id,phase_timing:x.phase,phase_date:x.phaseDate||'',procedure_text:x.procedure,responsible:x.responsible,evidence_options:x.evidence,completion_percent:x.completion===''?null:+x.completion,executed:x.executed,reason:x.reason,__new:x.new}));
             (d.deletes||[]).forEach(x=>pendingDeletes.add(x));execDirty=true;
           }else localStorage.removeItem(draftKey);
         }catch(_){localStorage.removeItem(draftKey)}
@@ -595,7 +609,7 @@ async function setupExecutivePlan(){
     await renderRows(true);
     const initial=Number(plan.progress||0);document.getElementById('execOverallProgress').textContent=initial+'%';
 
-    document.getElementById('execPrint')?.addEventListener('click',()=>window.print());
+    const summaryBtn=document.getElementById('execSummaryBtn');if(summaryBtn)summaryBtn.href=`print-program.html?plan_id=${encodeURIComponent(planId)}`;
     document.getElementById('execAddRow')?.addEventListener('click',()=>{
       if(currentRole!=='admin')return;rowsWrap.querySelector('.exec-empty-row')?.remove();
       const i=rowsNow().length;rowsWrap.insertAdjacentHTML('beforeend',editableRow({responsible:currentProfile?.full_name||'منسقة الموهوبات'},i,true));scheduleDraft();rowsWrap.querySelector('tr:last-child .exec-phase')?.focus();
@@ -610,13 +624,13 @@ async function setupExecutivePlan(){
         ms.querySelector('.multi-select-toggle').innerHTML=vals.length?vals.map(x=>`<span>${esc(x)}</span>`).join(''):'<em>اختاري الشواهد</em>';scheduleDraft();return}
       const cp=e.target.closest('.copy-prev-btn');
       if(cp){const tr=cp.closest('tr'),all=rowsNow(),i=all.indexOf(tr);if(i<=0)return alert('لا توجد مرحلة سابقة لنسخها.');const prev=all[i-1];
-        tr.querySelector('.exec-phase').value=prev.querySelector('.exec-phase').value;tr.querySelector('.exec-procedure').value=prev.querySelector('.exec-procedure').value;tr.querySelector('.exec-responsible').value=prev.querySelector('.exec-responsible').value;
+        tr.querySelector('.exec-phase').value=prev.querySelector('.exec-phase').value;tr.querySelector('.exec-phase-date').value=prev.querySelector('.exec-phase-date').value;tr.querySelector('.exec-procedure').value=prev.querySelector('.exec-procedure').value;tr.querySelector('.exec-responsible').value=prev.querySelector('.exec-responsible').value;
         const vals=readEvidence(prev),ms=tr.querySelector('.multi-select');ms.dataset.values=JSON.stringify(vals);ms.querySelector('.multi-select-toggle').innerHTML=vals.length?vals.map(x=>`<span>${esc(x)}</span>`).join(''):'<em>اختاري الشواهد</em>';ms.querySelectorAll('.evidence-option').forEach(o=>o.classList.toggle('selected',vals.includes(o.dataset.value)));scheduleDraft();return}
       const del=e.target.closest('.exec-delete');
       if(del&&currentRole==='admin'){const tr=del.closest('tr[data-id]');if(!tr||!confirm('حذف هذه المرحلة؟ سيتم اعتماد الحذف عند الحفظ.'))return;if(tr.dataset.new!=='1')pendingDeletes.add(tr.dataset.id);tr.remove();renumber();scheduleDraft();if(!rowsNow().length)rowsWrap.innerHTML='<tr class="exec-empty-row"><td colspan="7" class="empty-state">لم تتم إضافة مراحل بعد.</td></tr>';return}
     });
     document.addEventListener('click',e=>{if(!e.target.closest('.multi-select'))document.querySelectorAll('.multi-select-menu').forEach(x=>x.hidden=true)});
-    rowsWrap.addEventListener('input',e=>{if(e.target.matches('.exec-phase,.exec-procedure,.exec-responsible,.exec-percent,.exec-reason')){if(e.target.matches('.exec-percent'))updateOverall();scheduleDraft()}});
+    rowsWrap.addEventListener('input',e=>{if(e.target.matches('.exec-phase,.exec-phase-date,.exec-procedure,.exec-responsible,.exec-percent,.exec-reason')){if(e.target.matches('.exec-percent'))updateOverall();scheduleDraft()}});
     rowsWrap.addEventListener('change',e=>{const c=e.target.closest('.exec-choice');if(!c)return;const tr=c.closest('tr');if(c.checked)tr.querySelectorAll('.exec-choice').forEach(x=>{if(x!==c)x.checked=false});const no=tr.querySelector('[data-choice="no"]')?.checked,reason=tr.querySelector('.exec-reason');reason.classList.toggle('hidden-reason',!no);scheduleDraft()});
 
     document.getElementById('execSave')?.addEventListener('click',async()=>{
@@ -625,7 +639,7 @@ async function setupExecutivePlan(){
         saveBtn.disabled=true;showCloudStatus('جارِ حفظ الخطة التنفيذية...');
         for(let i=0;i<rows.length;i++){
           const tr=rows[i],id=tr.dataset.id,yes=tr.querySelector('[data-choice="yes"]')?.checked,no=tr.querySelector('[data-choice="no"]')?.checked;
-          const payload={plan_item_id:planId,phase_timing:tr.querySelector('.exec-phase').value.trim(),procedure_text:tr.querySelector('.exec-procedure').value.trim(),responsible:tr.querySelector('.exec-responsible').value.trim(),evidence_options:readEvidence(tr),completion_percent:tr.querySelector('.exec-percent').value===''?null:Math.max(0,Math.min(100,+tr.querySelector('.exec-percent').value||0)),executed:yes?true:no?false:null,reason:no?tr.querySelector('.exec-reason').value.trim():'',sort_order:i,updated_at:new Date().toISOString()};
+          const payload={plan_item_id:planId,phase_timing:tr.querySelector('.exec-phase').value.trim(),phase_date:tr.querySelector('.exec-phase-date').value.trim(),procedure_text:tr.querySelector('.exec-procedure').value.trim(),responsible:tr.querySelector('.exec-responsible').value.trim(),evidence_options:readEvidence(tr),completion_percent:tr.querySelector('.exec-percent').value===''?null:Math.max(0,Math.min(100,+tr.querySelector('.exec-percent').value||0)),executed:yes?true:no?false:null,reason:no?tr.querySelector('.exec-reason').value.trim():'',sort_order:i,updated_at:new Date().toISOString()};
           if(tr.dataset.new==='1'){const {error}=await sb.from('executive_plan_steps').insert(payload);if(error)throw error}else{const {error}=await sb.from('executive_plan_steps').update(payload).eq('id',id).eq('plan_item_id',planId);if(error)throw error}
         }
         if(pendingDeletes.size){const {error}=await sb.from('executive_plan_steps').delete().in('id',[...pendingDeletes]).eq('plan_item_id',planId);if(error)throw error}
@@ -649,10 +663,10 @@ async function setupPrintProgram(){
       sb.from('site_settings').select('coordinator_name,principal_name').order('id').limit(1).maybeSingle()
     ]);
     if(pErr)throw pErr;if(sErr)throw sErr;
-    document.getElementById('printProgramTitle').textContent=`ملخص برنامج: ${plan.title}`;
+    document.getElementById('printProgramTitle').textContent=`الخطة التنفيذية لبرنامج: ${plan.title}`;
     document.getElementById('printProgramMeta').innerHTML=`<span>الفترة: ${esc(plan.date_from||'—')} ${plan.date_to?`إلى ${esc(plan.date_to)}`:''}</span><span>المسجلات: ${plan.registered_count??'—'}</span><span>الإنجاز: ${plan.progress||0}%</span>`;
     document.getElementById('printProgramProgress').innerHTML=progressMeter(plan.progress||0);
-    document.getElementById('printProgramSteps').innerHTML=(steps||[]).map((s,i)=>`<tr><td>${i+1}</td><td>${esc(s.phase_timing||'—')}</td><td>${esc(s.procedure_text||'—')}</td><td>${esc(s.responsible||'—')}</td><td>${(s.evidence_options||[]).map(x=>esc(x)).join('، ')||'—'}</td><td>${s.completion_percent??0}%</td></tr>`).join('')||'<tr><td colspan="6">لا توجد مراحل مضافة.</td></tr>';
+    document.getElementById('printProgramSteps').innerHTML=(steps||[]).map((s,i)=>`<tr><td>${i+1}</td><td><strong>${esc(s.phase_timing||'—')}</strong>${s.phase_date?`<br><small>${esc(s.phase_date)}</small>`:''}</td><td>${esc(s.procedure_text||'—')}</td><td>${esc(s.responsible||'—')}</td><td>${(s.evidence_options||[]).map(x=>esc(x)).join('، ')||'—'}</td><td>${s.completion_percent??0}%</td><td>${s.executed===true?'نعم':s.executed===false?`لا${s.reason?` — ${esc(s.reason)}`:''}`:'—'}</td></tr>`).join('')||'<tr><td colspan="7">لا توجد مراحل مضافة.</td></tr>';document.getElementById('printBackToExec').href=`executive-plan.html?plan_id=${encodeURIComponent(planId)}`;
     document.getElementById('printProgramCoordinator').textContent=settings?.coordinator_name||'أبرار الهنيدي';document.getElementById('printProgramPrincipal').textContent=settings?.principal_name||'هدى البهيجي';
   }catch(e){root.innerHTML=`<div class="exec-error">تعذر تجهيز الملخص: ${esc(e.message)}</div>`}finally{clearBusy()}
 }

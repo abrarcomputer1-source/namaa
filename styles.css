@@ -760,3 +760,70 @@ dialog{max-height:min(88dvh,760px);overflow:hidden}
   @page{size:A4 landscape;margin:10mm}
   body{background:#fff!important;color:#111!important;font-size:10pt}.screen-only,.loading-screen,.cloud-status{display:none!important}.container{width:100%!important;max-width:none!important}.executive-page main,.print-sheet{margin:0!important}.exec-card,.print-program-card{box-shadow:none!important;border:0!important;padding:0!important}.print-letterhead{display:grid;grid-template-columns:1fr 1.4fr 1fr;align-items:center;border-bottom:2px solid #1b6e91;padding-bottom:8px;margin-bottom:12px}.print-ministry-mark{display:flex;align-items:center;gap:8px}.print-ministry-mark strong{display:block;font-size:15pt;color:#185b7b}.print-ministry-mark small{font-size:7pt;color:#5c6f7c}.moe-symbol{width:48px;height:48px;position:relative}.moe-symbol span{position:absolute;width:11px;height:11px;border-radius:50%;background:#1aa7a7}.moe-symbol span:nth-child(1){top:2px;left:18px}.moe-symbol span:nth-child(2){top:15px;left:3px}.moe-symbol span:nth-child(3){top:15px;left:33px}.moe-symbol span:nth-child(4){top:31px;left:10px;background:#2880bb}.moe-symbol span:nth-child(5){top:31px;left:27px;background:#2880bb}.print-school-head{text-align:center;line-height:1.55;font-size:8pt}.print-school-head strong,.print-school-head span{display:block}.print-school-logo{display:block;margin-right:auto;max-height:58px;max-width:110px;object-fit:contain}.exec-section-heading{text-align:center;margin-bottom:10px}.exec-section-heading h1{font-size:16pt!important;margin:4px 0!important}.exec-meta{justify-content:center!important}.exec-overall-progress{grid-template-columns:auto auto 180px;justify-content:center}.exec-table-scroll{overflow:visible}.exec-table-v10{min-width:0;width:100%;border-collapse:collapse}.exec-table-v10 th,.exec-table-v10 td{border:1px solid #b9c7d0!important;padding:5px!important;font-size:8pt!important}.exec-table-v10 input,.exec-table-v10 textarea,.multi-select-toggle{border:0!important;padding:0!important;background:transparent!important;resize:none!important;font-size:8pt!important}.copy-prev-btn,.exec-delete-mini,.multi-select-menu{display:none!important}.multi-select-toggle span{border:0!important;background:transparent!important;padding:0 2px!important}.exec-bool{justify-content:flex-start}.exec-bool label{border:0!important;padding:0!important}.exec-bool input{appearance:none;width:10px;height:10px;border:1px solid #333!important;margin:0 2px}.exec-bool input:checked::after{content:'✓';display:block;font-size:8pt;line-height:8px}.hidden-reason{display:none!important}.print-signatures{display:flex;justify-content:space-between;margin-top:18mm;padding:0 18mm}.print-signatures div{text-align:center;min-width:55mm}.print-signatures span,.print-signatures strong{display:block}.print-signatures span{margin-bottom:10px}.print-program-table{font-size:8pt}.print-program-table th,.print-program-table td{padding:5px}.print-program-page .print-letterhead{display:grid}.print-program-page .print-signatures{display:flex}.print-program-card>h1{font-size:16pt}.progress-meter-head span{display:none}.progress-track{height:7px}
 }
+
+/* ==============================
+   V11 — هوية المنصة / استجابة / طباعة رسمية
+   ============================== */
+.identity-showcase{margin:22px 0 10px;display:grid;gap:14px}
+.identity-main-pair{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.identity-panel{position:relative;display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:start;padding:24px 26px;border-radius:26px;border:1px solid rgba(207,226,239,.9);background:linear-gradient(145deg,rgba(255,255,255,.98),rgba(246,252,255,.95));box-shadow:0 12px 30px rgba(38,81,119,.07);overflow:hidden}
+.identity-panel::after{content:"";position:absolute;width:150px;height:150px;border-radius:50%;inset:auto -55px -75px auto;background:radial-gradient(circle,rgba(27,169,185,.11),transparent 70%)}
+.message-panel{background:linear-gradient(145deg,rgba(255,255,255,.98),rgba(247,245,255,.95))}
+.message-panel::after{background:radial-gradient(circle,rgba(118,89,232,.11),transparent 70%)}
+.identity-kicker{width:46px;height:46px;border-radius:16px;display:grid;place-items:center;font-weight:900;font-size:13px;color:#fff;background:linear-gradient(135deg,#158fc2,#18b1ae);box-shadow:0 8px 20px rgba(20,145,184,.16)}
+.message-panel .identity-kicker{background:linear-gradient(135deg,#675edc,#4b99df)}
+.identity-panel h3,.values-panel h3{margin:0 0 7px;font-family:'El Messiri','Cairo',sans-serif;font-size:23px;color:#173e70}
+.identity-panel p{margin:0;color:#60758f;line-height:1.95;font-size:15px}
+.values-panel{padding:18px 22px 20px;border-radius:24px;background:linear-gradient(90deg,#f7fcff,#fff,#f8f5ff);border:1px solid #dae9f2;box-shadow:0 10px 25px rgba(41,86,122,.055)}
+.values-heading{display:flex;align-items:center;gap:12px;margin-bottom:13px}.values-heading .identity-kicker{width:38px;height:38px;border-radius:13px;background:linear-gradient(135deg,#14a8ad,#7662df)}
+.values-heading h3{margin:0}.values-pills{display:flex;flex-wrap:wrap;gap:9px}
+.values-pills span{display:inline-flex;align-items:center;justify-content:center;padding:8px 15px;border-radius:999px;background:#fff;border:1px solid #dce9f1;color:#3d6283;font-weight:800;font-size:13px;box-shadow:0 6px 14px rgba(38,79,115,.05)}
+
+/* Balanced programs grid */
+.program-grid{display:flex!important;flex-wrap:wrap;justify-content:center;align-items:stretch;gap:20px}
+.program-grid .program-card{flex:0 1 calc(33.333% - 14px);min-width:250px;max-width:390px;width:100%}
+.program-grid.program-count-1 .program-card{flex-basis:min(390px,100%)}
+.program-grid.program-count-2 .program-card{flex-basis:calc(50% - 10px);max-width:500px}
+.program-grid.program-count-3 .program-card{flex-basis:calc(33.333% - 14px)}
+.program-grid.program-count-4 .program-card{flex-basis:calc(25% - 15px);max-width:none}
+.program-cover.clear-cover{background:#fff!important}
+.program-cover.clear-cover img{image-rendering:auto;filter:none!important;transform:none!important;object-fit:contain!important}
+
+/* Stats auto/manual controls and archive filter */
+.auto-stat-row{display:grid!important;grid-template-columns:1fr auto;gap:8px 14px;align-items:center}
+.auto-stat-row>input{grid-column:1/-1}.auto-toggle{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:#58728f;font-weight:800}.auto-toggle input{width:auto!important}
+.archive-tools{margin-bottom:12px;max-width:360px}.archive-tools label{margin:0}
+.phase-date-view{display:block;color:#71849a;margin-top:5px;font-weight:600}
+.exec-phase-date{margin-top:7px!important;background:#f9fcfe!important}
+
+/* Official A4 letterhead */
+.print-program-page .print-letterhead{display:grid}
+.official-letterhead{grid-template-columns:1.2fr .85fr 1fr!important;gap:18px;align-items:center;border-bottom:2px solid #4b9fbd;padding:8px 2px 12px;margin-bottom:14px;direction:rtl}
+.print-head-text{font-size:9pt;line-height:1.65;text-align:right;color:#243c52}.print-head-text strong,.print-head-text span{display:block}.print-head-text strong{font-weight:800}
+.print-ministry-logo-wrap{text-align:center}.print-ministry-logo{width:145px;max-height:78px;object-fit:contain}
+.print-school-logo-wrap{text-align:left}.print-school-logo{width:150px;max-width:100%;max-height:100px;object-fit:contain;margin:0!important}
+.print-program-card>h1{margin:8px 0 4px}
+.print-program-page .print-program-card{max-width:210mm;margin:0 auto}
+.print-program-table td small{color:#67798b}
+
+@media(max-width:980px){
+  .program-grid.program-count-4 .program-card,.program-grid .program-card{flex-basis:calc(50% - 10px);max-width:none}
+}
+@media(max-width:760px){
+  .identity-main-pair{grid-template-columns:1fr}.identity-panel{padding:20px 18px;grid-template-columns:auto 1fr;gap:13px}.identity-panel h3,.values-panel h3{font-size:20px}.identity-kicker{width:40px;height:40px;border-radius:13px}
+  .values-panel{padding:17px 16px}.values-pills{gap:7px}.values-pills span{font-size:12px;padding:7px 12px}
+  .program-grid .program-card,.program-grid.program-count-1 .program-card,.program-grid.program-count-2 .program-card,.program-grid.program-count-3 .program-card,.program-grid.program-count-4 .program-card{flex-basis:100%;max-width:520px;min-width:0}
+  .auto-stat-row{grid-template-columns:1fr}.auto-toggle{justify-self:start}.auto-stat-row>input{grid-column:auto}
+  .official-letterhead{grid-template-columns:1fr!important;text-align:center!important;gap:8px}.print-head-text{text-align:center}.print-school-logo-wrap{text-align:center}.print-school-logo{width:120px}.print-ministry-logo{width:130px}
+}
+
+@media print{
+  @page{size:A4 portrait;margin:11mm 9mm}
+  .official-letterhead{display:grid!important;grid-template-columns:1.2fr .85fr 1fr!important;gap:12px!important}
+  .print-head-text{text-align:right!important;font-size:7.7pt!important}.print-ministry-logo{width:118px!important;max-height:62px!important}.print-school-logo-wrap{text-align:left!important}.print-school-logo{width:105px!important;max-height:70px!important}
+  .print-program-card{width:100%!important;max-width:none!important}
+  .print-program-table th,.print-program-table td{font-size:7.3pt!important;padding:4px!important;line-height:1.45}
+  .print-program-table{table-layout:fixed}.print-program-table th:nth-child(1){width:4%}.print-program-table th:nth-child(2){width:15%}.print-program-table th:nth-child(3){width:27%}.print-program-table th:nth-child(4){width:14%}.print-program-table th:nth-child(5){width:18%}.print-program-table th:nth-child(6){width:9%}.print-program-table th:nth-child(7){width:13%}
+  .print-signatures{margin-top:12mm!important}
+}
+.attention-badge{display:inline-flex;margin-top:7px;padding:5px 9px;border-radius:999px;background:#fff4df;color:#9b6410;border:1px solid #f2dfb5;font-size:11px;font-weight:900}

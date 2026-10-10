@@ -6,21 +6,21 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta name="theme-color" content="#0b6fa4" />
   <title>الخطة التنفيذية | نماء</title>
-  <link rel="stylesheet" href="styles.css?v=10.0.0" />
+  <link rel="stylesheet" href="styles.css?v=11.0.0" />
 </head>
 <body class="executive-page">
-  <header class="container exec-header screen-only"><img src="assets/header-banner.png?v=10.0.0" alt="منصة نماء" /></header>
+  <header class="container exec-header screen-only"><img src="assets/header-banner.png?v=11.0.0" alt="منصة نماء" /></header>
   <main id="executivePlanPage" class="container">
     <div class="exec-toolbar exec-toolbar-compact screen-only">
       <a class="btn secondary" id="backToPlanBtn" href="admin.html#plan">العودة إلى الخطة الفصلية</a>
-      <div class="exec-toolbar-actions"><button id="execPrint" class="btn secondary" type="button">طباعة الخطة A4</button><button id="execAddRow" class="btn primary exec-admin-only" type="button">+ إضافة مرحلة</button></div>
+      <div class="exec-toolbar-actions"><a id="execSummaryBtn" class="btn secondary" href="#">عرض وطباعة الملخص</a><button id="execAddRow" class="btn primary exec-admin-only" type="button">+ إضافة مرحلة</button></div>
     </div>
     <div id="execPlanError" class="exec-error" hidden></div>
     <section class="card exec-card">
-      <div class="print-letterhead">
-        <div class="print-ministry-mark"><div class="moe-symbol" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div><div><strong>وزارة التعليم</strong><small>Ministry of Education</small></div></div>
-        <div class="print-school-head"><strong>المملكة العربية السعودية</strong><span>وزارة التعليم</span><span>الإدارة العامة للتعليم بمنطقة المدينة المنورة</span><span>الثانوية الأولى للبنات بينبع البحر</span><span>ثانوية تعليم كبيرات بينبع البحر</span></div>
-        <img src="assets/school-logo.jpeg" alt="شعار المدرسة" class="print-school-logo" />
+      <div class="print-letterhead official-letterhead">
+        <div class="print-head-text"><strong>المملكة العربية السعودية</strong><span>وزارة التعليم</span><span>الإدارة العامة للتعليم بمنطقة المدينة المنورة</span><span>الثانوية الأولى للبنات بينبع البحر</span><span>الثانوية الأولى كبيرات بينبع البحر</span></div>
+        <div class="print-ministry-logo-wrap"><img src="assets/ministry-logo.png" alt="شعار وزارة التعليم" class="print-ministry-logo" /></div>
+        <div class="print-school-logo-wrap"><img src="assets/school-logo.jpeg" alt="شعار المدرسة" class="print-school-logo" /></div>
       </div>
       <div class="exec-section-heading">
         <h1 id="execPlanTitle">الخطة التنفيذية</h1><div id="execPlanMeta" class="exec-meta"></div>
@@ -33,6 +33,6 @@
     </section>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=10.0.0"></script>
+  <script src="app.js?v=11.0.0"></script>
 </body>
 </html>

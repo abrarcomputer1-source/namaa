@@ -4,26 +4,26 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex" />
-  <title>ملخص البرنامج | نماء</title>
-  <link rel="stylesheet" href="styles.css?v=10.0.0" />
+  <title>الخطة التنفيذية | نماء</title>
+  <link rel="stylesheet" href="styles.css?v=11.0.0" />
 </head>
 <body class="print-program-page">
   <main id="printProgramPage" class="print-sheet container">
-    <div class="print-actions screen-only"><a class="btn secondary" href="admin.html#plan">العودة للخطة</a><button class="btn primary" type="button" onclick="window.print()">طباعة A4</button></div>
+    <div class="print-actions screen-only"><a class="btn secondary" id="printBackToExec" href="admin.html#plan">العودة للخطة التنفيذية</a><button class="btn primary" type="button" onclick="window.print()">طباعة A4</button></div>
     <section class="card print-program-card">
-      <div class="print-letterhead">
-        <div class="print-ministry-mark"><div class="moe-symbol" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div><div><strong>وزارة التعليم</strong><small>Ministry of Education</small></div></div>
-        <div class="print-school-head"><strong>المملكة العربية السعودية</strong><span>وزارة التعليم</span><span>الإدارة العامة للتعليم بمنطقة المدينة المنورة</span><span>الثانوية الأولى للبنات بينبع البحر</span><span>ثانوية تعليم كبيرات بينبع البحر</span></div>
-        <img src="assets/school-logo.jpeg" alt="شعار المدرسة" class="print-school-logo" />
+      <div class="print-letterhead official-letterhead">
+        <div class="print-head-text"><strong>المملكة العربية السعودية</strong><span>وزارة التعليم</span><span>الإدارة العامة للتعليم بمنطقة المدينة المنورة</span><span>الثانوية الأولى للبنات بينبع البحر</span><span>الثانوية الأولى كبيرات بينبع البحر</span></div>
+        <div class="print-ministry-logo-wrap"><img src="assets/ministry-logo.png" alt="شعار وزارة التعليم" class="print-ministry-logo" /></div>
+        <div class="print-school-logo-wrap"><img src="assets/school-logo.jpeg" alt="شعار المدرسة" class="print-school-logo" /></div>
       </div>
       <h1 id="printProgramTitle">ملخص البرنامج</h1>
       <div id="printProgramMeta" class="print-program-meta"></div>
       <div id="printProgramProgress"></div>
-      <table class="print-program-table"><thead><tr><th>#</th><th>المرحلة والتوقيت</th><th>إجراءات التنفيذ</th><th>المسؤول</th><th>الشواهد</th><th>الإنجاز</th></tr></thead><tbody id="printProgramSteps"></tbody></table>
+      <table class="print-program-table"><thead><tr><th>#</th><th>المرحلة والتوقيت</th><th>إجراءات التنفيذ</th><th>المسؤول عن التنفيذ</th><th>الشواهد ومؤشرات التحقق</th><th>نسبة الإنجاز</th><th>التنفيذ</th></tr></thead><tbody id="printProgramSteps"></tbody></table>
       <div class="print-signatures"><div><span>منسقة الموهوبات</span><strong id="printProgramCoordinator">أبرار الهنيدي</strong></div><div><span>مديرة المدرسة</span><strong id="printProgramPrincipal">هدى البهيجي</strong></div></div>
     </section>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js?v=10.0.0"></script>
+  <script src="app.js?v=11.0.0"></script>
 </body>
 </html>
