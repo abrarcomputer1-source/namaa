@@ -3,14 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>لوحة تحكم نماء</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=10.0.0" />
 </head>
 <body class="admin-body">
   <div class="admin-shell">
-    <aside class="sidebar">
+    <aside class="sidebar" id="adminSidebar">
       <div class="side-brand">
-        <img src="assets/mawhiba-logo.png" alt="موهبة" />
+        <img src="assets/mawhiba-logo.png?v=10.0.0" alt="موهبة" />
         <strong>نماء</strong>
         <small>لوحة التحكم</small>
       </div>
@@ -30,6 +33,9 @@
 
     <main class="admin-main">
       <div class="admin-topbar card">
+        <button class="admin-menu-toggle" id="adminMenuToggle" type="button" aria-label="فتح قائمة لوحة التحكم" aria-expanded="false">
+          <span class="menu-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+        </button>
         <div>
           <h1>مرحبًا <span id="currentUserName">...</span></h1>
           <p>لوحة متابعة وإدارة منصة نماء</p>
@@ -56,7 +62,9 @@
           <p class="admin-note">من هنا تستطيعين تعديل النصوص الرئيسية ووضع خلفية مناسبة للواجهة العلوية.</p>
           <label>عنوان الواجهة <input id="fHeroTitle" /></label>
           <label>النص التعريفي <textarea id="fHeroText" rows="3"></textarea></label>
-          <label>رؤية المنصة <textarea id="fVision" rows="4"></textarea></label>
+          <label>رؤية المنصة <textarea id="fVision" rows="3"></textarea></label>
+          <label>رسالة المنصة <textarea id="fMessage" rows="3"></textarea></label>
+          <label>قيم المنصة <textarea id="fValues" rows="3" placeholder="مثال: الإبداع • التمكين • المبادرة • المسؤولية"></textarea></label>
           <label>صورة/خلفية الواجهة عبر رابط مباشر <input id="fHeroImageUrl" placeholder="https://..." /></label>
           <div class="image-tools">
             <label class="file-pick">اختيار صورة من الجهاز <input type="file" id="fHeroImageFile" accept="image/*" /></label>
@@ -95,8 +103,14 @@
 
       <section data-panel="plan" class="admin-panel">
         <div class="section-head admin-head"><h2>الخطة الفصلية</h2><button class="btn primary edit-only" id="addPlanBtn">+ إضافة بند</button></div>
-        <p class="admin-note">لكل بند فترة تنفيذ من–إلى، ونسبة إنجاز، ويمكن إرفاق تقرير PDF مستقل حتى 50MB.</p>
-        <div class="plan-tools card padded"><label>تصفية حسب الحالة<select id="planStatusFilter"><option value="all">الكل</option><option value="مكتمل">مكتمل</option><option value="جار التنفيذ">جار التنفيذ</option><option value="لم يبدأ">لم يبدأ</option></select></label></div>
+        <p class="admin-note">لكل بند فترة تنفيذ وعدد مسجلات وتقرير ختامي. نسبة الإنجاز تُحسب تلقائيًا من متوسط نسب مراحل الخطة التنفيذية.</p>
+        <div class="plan-tools card padded">
+          <label>تصفية الخطة<select id="planStatusFilter">
+            <option value="all">الكل</option><option value="مكتمل">مكتمل</option><option value="جار التنفيذ">جار التنفيذ</option><option value="لم يبدأ">لم يبدأ</option>
+            <option value="low">أقل من 50%</option><option value="no-report">بدون تقرير ختامي</option><option value="no-evidence">بدون شواهد محددة</option>
+            <option value="no-registered">بدون عدد مسجلات</option><option value="needs-completion">يحتاج استكمال</option>
+          </select></label>
+        </div>
         <div id="planTableWrap" class="card padded"></div>
       </section>
 
@@ -143,10 +157,10 @@
           <div class="account-email-box"><small>البريد الحالي</small><strong id="currentUserEmail">...</strong></div>
           <form id="changePasswordForm" class="account-password-form">
             <label>كلمة المرور الجديدة
-              <div class="password-field"><input id="accountNewPassword" type="password" minlength="8" autocomplete="new-password" required><button class="password-toggle" type="button" data-toggle-password="accountNewPassword" aria-label="إظهار كلمة المرور" title="إظهار كلمة المرور"><span class="eye-icon" aria-hidden="true"></span></button></div>
+              <div class="password-field"><input id="accountNewPassword" type="password" minlength="8" autocomplete="new-password" required><button class="password-toggle" type="button" data-toggle-password="accountNewPassword" aria-label="إظهار كلمة المرور" title="إظهار كلمة المرور"><svg class="eye-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.8"/></svg></button></div>
             </label>
             <label>تأكيد كلمة المرور
-              <div class="password-field"><input id="accountNewPasswordConfirm" type="password" minlength="8" autocomplete="new-password" required><button class="password-toggle" type="button" data-toggle-password="accountNewPasswordConfirm" aria-label="إظهار كلمة المرور" title="إظهار كلمة المرور"><span class="eye-icon" aria-hidden="true"></span></button></div>
+              <div class="password-field"><input id="accountNewPasswordConfirm" type="password" minlength="8" autocomplete="new-password" required><button class="password-toggle" type="button" data-toggle-password="accountNewPasswordConfirm" aria-label="إظهار كلمة المرور" title="إظهار كلمة المرور"><svg class="eye-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.8"/></svg></button></div>
             </label>
             <button class="btn primary" type="submit">تغيير كلمة المرور</button>
             <div id="accountPasswordMessage" class="login-message" aria-live="polite"></div>
@@ -170,6 +184,6 @@
   </dialog>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js"></script>
+  <script src="app.js?v=10.0.0"></script>
 </body>
 </html>

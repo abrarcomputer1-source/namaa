@@ -3,13 +3,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>دخول الإدارة | نماء</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=10.0.0" />
 </head>
 <body class="login-body">
   <main class="login-shell">
     <section class="login-card card">
-      <img src="assets/header-banner.png" alt="منصة نماء" class="login-banner" />
+      <img src="assets/header-banner.png?v=10.0.0" alt="منصة نماء" class="login-banner" />
       <div class="login-content">
         <span class="eyebrow">دخول آمن</span>
         <h1>لوحة منصة نماء</h1>
@@ -19,7 +22,7 @@
           <label>كلمة المرور
             <div class="password-field">
               <input id="loginPassword" type="password" autocomplete="current-password" required />
-              <button class="password-toggle" type="button" data-toggle-password="loginPassword" aria-label="إظهار كلمة المرور" title="إظهار كلمة المرور"><span class="eye-icon" aria-hidden="true"></span></button>
+              <button class="password-toggle" type="button" data-toggle-password="loginPassword" aria-label="إظهار كلمة المرور" title="إظهار كلمة المرور"><svg class="eye-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.8"/></svg></button>
             </div>
           </label>
           <button class="btn primary login-submit" type="submit">تسجيل الدخول</button>
@@ -31,6 +34,6 @@
     </section>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js"></script>
+  <script src="app.js?v=10.0.0"></script>
 </body>
 </html>
